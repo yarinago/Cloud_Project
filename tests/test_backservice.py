@@ -1,0 +1,171 @@
+import os
+import psycopg2
+import unittest
+from unittest import mock
+from dotenv import load_dotenv
+from flaskr import backservice
+from flaskr.backservice import app
+
+load_dotenv()
+
+#region DB CONNECTION VARIABLES
+BASE_URL = os.getenv("BASE_URL")
+DB_HOST = os.getenv("DB_HOST") 
+DB_USERNAME = os.getenv("DB_USERNAME")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+#endregion
+#region CREATE/UPDATE ARGUMENTS VARIABLES
+ARGUMENTS_CREATE = "id=1111111111&first_name=yar&last_name=in&email=yarin@gmail.com&job_id=7894561235&action=create"
+EXPECTED_DATA_CREATE = {'id': 1111111111, 'first_name': 'yar', 'last_name': 'in', 'email': 'yarin@gmail.com', 'job_id': 7894561235}
+ARGUMENTS_UPDATE = "id=1111111111&first_name=test&last_name=ing&email=testing@gmail.com&job_id=7894561235&action=update"
+EXPECTED_DATA_UPDATE = {'id': 1111111111, 'first_name': 'test', 'last_name': 'ing', 'email': 'testing@gmail.com', 'job_id': 7894561235}
+#endregion
+
+class TestBackServices(unittest.TestCase):
+
+    # Create a test client to send requests to the app
+    def setUp(self):
+        self.app = app.test_client()
+    
+    def test_server_is_up(self): 
+        response = self.app.get(f"{BASE_URL}/health")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Healthy", response.json['msg'])
+
+    # TODO: THINK HOW CAN I GET A RESPONSE WHEN THE SERVER IS DOWN + TIMEOUT
+    #def test_server_is_down(self):
+    #    with mock.patch("psycopg2.connect", side_effect=Exception("Database is down")):
+    #        self.app.get(f"{BASE_URL}/health")
+
+    def test_server_path_incorrect(self):
+        response = self.app.get(f"{BASE_URL}/invalid")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("Route not found", response.json['msg'])
+
+    def test_db_connection_working(self): 
+        response = self.app.get(f"{BASE_URL}/ready")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("DB connection work", response.json['msg'])
+
+    # TODO: HOW CAN I TEST TOGETHER THAT THE DB IS UP AND DOWN (THE MOCK DOESNT RETURN THE RIGHT ERROR)
+    #def test_db_connection_not_working(self):
+    #    with mock.patch("psycopg2.connect", side_effect=psycopg2.Error("Connection failed with")):
+    #        response = self.app.get(f"{BASE_URL}/ready")
+    #        self.assertEqual(response.status_code, 404)
+    #        self.assertIn("Connection failed with", response.json['msg'])
+
+    def test_db_pass_incorrect(self): 
+        # Change the value of DB_PASSWORD for testing
+        setattr(backservice, "DB_PASSWORD", "incorrect")
+        response = self.app.get(f"{BASE_URL}/ready")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+
+    def test_db_username_incorrect(self):
+        setattr(backservice, "DB_USERNAME", "incorrect")
+        response = self.app.get(f"{BASE_URL}/ready")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+
+    def test_db_not_exist(self):
+        setattr(backservice, "DB_HOST", "incorrect")
+        response = self.app.get(f"{BASE_URL}/ready")
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+
+    def test_get_all_valid(self):
+        try:
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.failIf(response.status_code != 200, "Could not insert value to DB in order to start the test")
+
+
+            response = self.app.get(f"{BASE_URL}/candidate")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
+        finally:       
+            response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+
+    def test_get_one_valid(self):
+        try:
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.failIf(response.status_code != 200, "Could not insert value to DB in order to start the test")
+
+            response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
+        finally:
+            response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+
+    def test_post_create_new_valid(self):
+        try:
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+
+            response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
+        finally:
+            response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+
+    def test_post_create_already_exist(self):
+        try:
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)                
+            response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
+
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 404)
+            self.assertIn('duplicate key value violates', response.json['msg'])
+        finally:
+            response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+        
+    def test_post_update_valid(self):
+        try:
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)        
+            response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
+
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
+            response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_UPDATE, response.json['data'])
+        finally:
+            response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
+            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+        
+    def test_delete_valid(self):
+        try:
+            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)                
+            response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
+        finally:
+            response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+            self.assertEqual(response.status_code, 200)
+            self.assertIn("no data could be returned", response.json['msg'])
+
+        response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("no data could be returned", response.json['msg'])
+
+    def test_get_req_params_not_valid(self):  
+        response = self.app.get(f"{BASE_URL}/candidate?key=1111111111")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("argument is not exist", response.json['msg'])
+
+    def test_post_req_params_not_valid(self):
+        response = self.app.post(f"{BASE_URL}/candidate?key=1111111111&action=create")
+        self.assertEqual(response.status_code, 404)
+        self.assertIn("argument is not exist", response.json['msg'])
+
+if __name__ == '__main__':
+    unittest.main()
