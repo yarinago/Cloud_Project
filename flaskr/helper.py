@@ -15,19 +15,20 @@ CONTENT_HEADER = {"content_type": "application/json; charset=utf-8"}
 # Check if the params given to the api request are valid
 def isParamsValid(record: dict):
     error_msgs = []
+    COLUMNS_LIST = ['id', 'first_name', 'last_name', 'email', 'job_id']
 
     for key, value in record.items():
-        if key == KEY_COLUMNS_NAMES and (value is None or value < 1000000000 or value > 9999999999):
+        if key == KEY_COLUMNS_NAMES and (value is None or int(value) < 1000000000 or int(value) > 9999999999):
             error_msgs.append(f"Query {KEY_COLUMNS_NAMES} value is incorrect: {value}")
-        elif key == "first_name" and (value is None or not regex.fullmatch(IS_NAME_VALID_REGEX, value)):
+        elif key == COLUMNS_LIST[1] and (value is None or not regex.fullmatch(IS_NAME_VALID_REGEX, value)):
             error_msgs.append(f"Query first_name value is incorrect: {value}")
-        elif key == "last_name" and (value is None or not regex.fullmatch(IS_NAME_VALID_REGEX, value)):
+        elif key == COLUMNS_LIST[2] and (value is None or not regex.fullmatch(IS_NAME_VALID_REGEX, value)):
             error_msgs.append(f"Query last_name value is incorrect: {value}")
-        elif key == "email" and (value is None or not regex.fullmatch(IS_EMAIL_VALID_REGEX, value)):
+        elif key == COLUMNS_LIST[3] and (value is None or not regex.fullmatch(IS_EMAIL_VALID_REGEX, value)):
             error_msgs.append(f"Query email value is incorrect: {value}")
-        elif key == "job_id" and (value is None or value < 1000000000 or value > 9999999999):
+        elif key == COLUMNS_LIST[4] and (value is None or int(value) < 1000000000 or int(value) > 9999999999):
             error_msgs.append(f"Query job_id value is incorrect: {value}")
-        else:
+        elif (not key in COLUMNS_LIST):
             raise KeyError("{key}={value} argument is not exist", 422)
 
     if error_msgs:

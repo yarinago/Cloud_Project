@@ -26,6 +26,15 @@ class TestBackServices(unittest.TestCase):
     # Create a test client to send requests to the app
     def setUp(self):
         self.app = app.test_client()
+        self.original_db_password = backservice.DB_PASSWORD
+        self.original_db_username = backservice.DB_USERNAME
+        self.original_db_host = backservice.DB_HOST
+
+    def tearDown(self):
+        # Restore the original values of the environment variables
+        backservice.DB_PASSWORD = self.original_db_password
+        backservice.DB_USERNAME = self.original_db_username
+        backservice.DB_HOST = self.original_db_host
     
     def test_server_is_up(self): 
         response = self.app.get(f"{BASE_URL}/health")
