@@ -1,7 +1,5 @@
 import os
-import psycopg2
 import unittest
-from unittest import mock
 from dotenv import load_dotenv
 from flaskr import backservice
 from flaskr.backservice import app
@@ -41,11 +39,6 @@ class TestBackServices(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Healthy", response.json['msg'])
 
-    # TODO: THINK HOW CAN I GET A RESPONSE WHEN THE SERVER IS DOWN + TIMEOUT
-    #def test_server_is_down(self):
-    #    with mock.patch("psycopg2.connect", side_effect=Exception("Database is down")):
-    #        self.app.get(f"{BASE_URL}/health")
-
     def test_server_path_incorrect(self):
         response = self.app.get(f"{BASE_URL}/invalid")
         self.assertEqual(response.status_code, 404)
@@ -55,13 +48,6 @@ class TestBackServices(unittest.TestCase):
         response = self.app.get(f"{BASE_URL}/ready")
         self.assertEqual(response.status_code, 200)
         self.assertIn("DB connection work", response.json['msg'])
-
-    # TODO: HOW CAN I TEST TOGETHER THAT THE DB IS UP AND DOWN (THE MOCK DOESNT RETURN THE RIGHT ERROR)
-    #def test_db_connection_not_working(self):
-    #    with mock.patch("psycopg2.connect", side_effect=psycopg2.Error("Connection failed with")):
-    #        response = self.app.get(f"{BASE_URL}/ready")
-    #        self.assertEqual(response.status_code, 404)
-    #        self.assertIn("Connection failed with", response.json['msg'])
 
     def test_db_pass_incorrect(self): 
         # Change the value of DB_PASSWORD for testing

@@ -73,41 +73,31 @@ def createQueryByRequestType(args: dict, request_type: str, action: str = None):
     query = ""
 
     # Process each set of values
-    results = helper.argsToSetOfValues(args)
+    record = helper.argsToSetOfValues(args)
     
     #TODO: THIS METHOD SEEMS VERY WASTEFULLY BECAUSE WE CREATE NEW STRING EACH TIME
     if(request_type == "GET" or request_type == "DELETE"):
 
         query = f"SELECT * FROM {TABLE_NAME} WHERE " if request_type == "GET" else f"DELETE FROM {TABLE_NAME} WHERE "
-        # SELECT * FROM TABLE_NAME WHERE (key1=value1 and key2=value2 and ...) or (key11=value11 and key22=value22 and ...) or ...
-        conditions = []
-        for record in results:
-            condition = " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()])
-            conditions.append(f"({condition})")
+        # SELECT * FROM TABLE_NAME WHERE key1=value1 and key2=value2 and ...
+        query += " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()]) 
 
-        query += " OR ".join(conditions)        
         return query
     
     if(request_type == "POST"):
-        values = []
         # INSERT INTO TABLE_NAME(id, first_name, last_name, email, job_id) VALUES (%s, %s, %s, %s, %s)
-        # values = [('value1', 'value2', None, None), ('value3', None, 'value4', None), ('value5', 'value6', 'value7', 'value8')]
         if action == "create":
             values = []
             columns = []
-            for record in results:
-                for key, value in record.items():
-                    columns.append(key)
-                    values.append(f"\'{value}\'")
+            for key, value in record.items():
+                columns.append(key)
+                values.append(f"\'{value}\'")
             
             query = "INSERT INTO {} ({}) VALUES ({})".format(TABLE_NAME, ", ".join(columns), ", ".join(values))
 
         if(action == "update"):
-            conditions = []
-            for record in results:
-                key_value_pairs = ", ".join(["{}='{}'".format(key, value) for key, value in record.items()])
-            
-            query = "UPDATE {} SET {} WHERE {}='{}'".format(TABLE_NAME, key_value_pairs, KEY_COLUMNS_NAMES, record.get(KEY_COLUMNS_NAMES))
+            key_value_pairs = ", ".join(["{}='{}'".format(key, value) for key, value in record.items()])            
+            query = f"UPDATE {TABLE_NAME} SET {key_value_pairs} WHERE {KEY_COLUMNS_NAMES}='{record.get(KEY_COLUMNS_NAMES)}'"
         
         return query
 

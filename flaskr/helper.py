@@ -41,26 +41,15 @@ def isParamsValid(record: dict):
 def argsToSetOfValues(args: dict):
     # Process each set of values
     record = {}
-    records_list = []
     for key, value in args.items():
-        # When the table is "candidate" the "id" columns is a most, therefor it is our separator between records_list
-        if key == KEY_COLUMNS_NAMES and record:
-            # Check Validity of given params
-            response = isParamsValid(record)
-            if (response.status_code != 200):
-                raise ValueError(response.json["msg"]) 
-            
-            records_list.append(record)
-            record.clear()
-
         if(key != "action"):
             record[key] = value
     
     response = isParamsValid(record)
     if (response.status_code != 200):
         raise ValueError(response.json["msg"]) 
-    records_list.append(record) # For the last record OR in case we have only one record
-    return records_list
+    
+    return record
 
 
 # Take a list of records_list and create a new json variable that match the columns as key and values from record
@@ -85,13 +74,13 @@ def getResponseFromDB(connection: object, cur: object, query: list, success_msg:
         cur.execute(query)
         if(request_type in ("GET", "POST")):
             candidates_raw = cur.fetchall()
-            is_query_successful = True if candidates_raw is not None else is_query_successful
-
-        if(request_type == "DELETE"):
+            is_query_successful = True if candidates_raw is not None else False
+        elif(request_type == "DELETE"):
             is_query_successful = bool(cur.rowcount)
 
         if(is_query_successful):
-            if request_type == "DELETE" or request_type == "POST": connection.commit() 
+            if request_type == "DELETE" or request_type == "POST": connection.commit()
+
             if(candidates_raw):
                 candidates_json = dataJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
             else:
