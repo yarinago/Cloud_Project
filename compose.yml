@@ -1,16 +1,20 @@
 version: '3.8'
 
-
 services:
-  # flask:
-  #   build: .
-  #   command: python backservice.py run -h 0.0.0.0
-  #   volumes:
-  #     - .:/app
-  #   ports:
-  #     - 5000:5000
-  #   env_file:
-  #     - ./.env
+  flask:
+    build: .
+    command:
+    volumes:
+      - .:/app
+    ports:
+      - 5000:5000
+    env_file:
+      - ./.env  # Take the .env file and use it
+    depends_on:
+      - postgres
+    labels:
+      - "com.example.description=Flask API Service"
+      - "com.example.role=app"
   postgres:
     restart: on-failure:3
     image: postgres:alpine
@@ -23,3 +27,6 @@ services:
       - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
     ports:
       - "5432:5432"
+    labels:
+      - "com.example.description=PostgreSQL Database"
+      - "com.example.role=db"
