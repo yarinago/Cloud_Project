@@ -19,11 +19,11 @@ connection = object
 # region SQL QUERIES PARAMS
 RECORDS_LIMIT = os.getenv("RECORDS_LIMIT")
 # The API request will work on this table with this primary key column
-TABLE_NAME = os.getenv("TABLE_NAME")
+TABLE_NAME = "candidates"
 # The private key column name of the TABLE_NAME
-KEY_COLUMNS_NAMES = os.getenv("KEY_COLUMNS_NAMES")
+KEY_COLUMNS_NAMES = "id"
 # endregion
-DB_NOT_WORKING_MSG = f"Connection failed with HOST={DB_HOST}, PORT={DB_PORT}, NAME={DB_NAME}, USERNAME={DB_USERNAME}, password is stored in secret."
+DB_NOT_WORKING_MSG = f"Connection failed with HOST={DB_HOST}, PORT={DB_PORT}, NAME={DB_NAME}, USERNAME={DB_USERNAME}, password is stored in {DB_PASSWORD} secret."
 CONTENT_HEADER = {"content_type": "application/json; charset=utf-8"}
 
 app = Flask(__name__)
@@ -68,114 +68,135 @@ def apiHandelReady():
             connection.close()
 
 
-# Return all the records that match the args parameters
-def createQueryByRequestType(args: dict, request_type: str, action: str = None):
+@app.route("/candidate", methods=["GET"])
+def apiHandelGetCandidate():
     query = ""
+    candidates_raw = None
+    candidates_json = []
+    success = "Successful in fetching all candidates"
+    error = "Candidates data for GET request not found"
+    GET_ALL_CANDIDATES = f"SELECT * FROM {TABLE_NAME} "
+    GET_ONE_CANDIDATE = f"SELECT * FROM {TABLE_NAME} WHERE "
 
-    # Process each set of values
-    record = helper.argsToSetOfValues(args)
+    try:
+        connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions)
+        cur = connection.cursor()
+
+        args = request.args.to_dict() # Store the url query params
+        # Get all candidates
+        if(args == {}):  
+            query = GET_ALL_CANDIDATES               
+        # Get one candidates
+        else: 
+            record = helper.argsToSetOfValues(args) # Process each set of values            
+            # SELECT * FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
+            query = GET_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()]) 
+        
+        cur.execute(query + RECORDS_LIMIT)
+        candidates_raw = cur.fetchall()
+        if(candidates_raw):
+            candidates_json = helper.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+        else:
+            success = f"The request was successfully for this query but no data could be returned: \n {query}"
+        return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)    
     
-    #TODO: THIS METHOD SEEMS VERY WASTEFULLY BECAUSE WE CREATE NEW STRING EACH TIME
-    if(request_type == "GET" or request_type == "DELETE"):
+    except psycopg2.errors.UndefinedTable as exe:
+        return make_response(jsonify({"msg": "Table {} not exist. \n {}.".format(TABLE_NAME, str(exe))}), 404, CONTENT_HEADER)
+    except Exception as exe:
+        return make_response(jsonify({"msg": "An error occurred: {}. \n {}: {}.".format(error, type(exe), str(exe))}), 404, CONTENT_HEADER)
+        #TODO: LOG THE ERROR
+    finally:
+        connection.close()            
 
-        query = f"SELECT * FROM {TABLE_NAME} WHERE " if request_type == "GET" else f"DELETE FROM {TABLE_NAME} WHERE "
-        # SELECT * FROM TABLE_NAME WHERE key1=value1 and key2=value2 and ...
-        query += " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()]) 
 
-        return query
-    
-    if(request_type == "POST"):
-        # INSERT INTO TABLE_NAME(id, first_name, last_name, email, job_id) VALUES (%s, %s, %s, %s, %s)
-        if action == "create":
-            values = []
-            columns = []
-            for key, value in record.items():
-                columns.append(key)
-                values.append(f"\'{value}\'")
+@app.route("/candidate", methods=["POST"])
+def apiHandelPostCandidate():
+    query = ""
+    success = ""
+    error = ""
+    values = []
+    columns = []
+    candidates_raw = None
+    candidates_json = []
+
+    try:
+        connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions)
+        cur = connection.cursor()
+
+        # Store the url query params
+        args = request.args.to_dict()
+        # Retrieve the 'action' argument and check it is valid
+        action = args.pop("action") 
+        if (not action in {"create", "update"}):
+            return make_response(jsonify({"msg": f"'action' key is incorrect. The only valid options are 'create' and 'insert'."}), 404, CONTENT_HEADER) 
             
-            query = "INSERT INTO {} ({}) VALUES ({})".format(TABLE_NAME, ", ".join(columns), ", ".join(values))
+        # Process each set of values
+        record = helper.argsToSetOfValues(args)
+        success = f"Successful in {action} all new candidates"
+        error = f"Candidates data for POST ({action}) request not found"
 
+        # UPDATE {TABLE_NAME} SET first_name=%s, email=%s, ... WHERE id=%s
         if(action == "update"):
             key_value_pairs = ", ".join(["{}='{}'".format(key, value) for key, value in record.items()])            
             query = f"UPDATE {TABLE_NAME} SET {key_value_pairs} WHERE {KEY_COLUMNS_NAMES}='{record.get(KEY_COLUMNS_NAMES)}'"
         
-        return query
-
-
-@app.route("/candidate", methods=["GET", "POST", "DELETE"])
-def apiHandelCandidate():
-    GET_ALL_CANDIDATES = f"SELECT * FROM {TABLE_NAME} "
-    # TODO: CHANGE THE 100 TO A VARIABLE FROM USERS WITH DEFAULT OF 100
+        # INSERT INTO {TABLE_NAME} (id, first_name, last_name, email, job_id) VALUES (%s, %s, %s, %s, %s)
+        if action == "create":
+            for key, value in record.items():
+                columns.append(key)
+                values.append(f"\'{value}\'")
+            query = "INSERT INTO {} ({}) VALUES ({})".format(TABLE_NAME, ", ".join(columns), ", ".join(values))
+        
+        cur.execute(query + "RETURNING *")
+        candidates_raw = cur.fetchall()
+        connection.commit()
+        if(candidates_raw):
+            candidates_json = helper.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+        else:
+            success = f"The request was successfully for this query but no data could be returned: \n {query}"
+        return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
     
-    messages = {
-        "get": {
-            "success": "Successful in fetching all candidates",
-            "error": "Candidates data for GET request not found"
-        },
-        "create": {
-            "success": "Successful in creating all new candidates",
-            "error": "Candidates data for POST (create) request not found"
-        },
-        "update": {
-            "success": "Successful in updating all candidates",
-            "error": "Candidates data for POST (update) request not found"
-        },
-        "delete": {
-            "success": "Successful in deleting all candidates",
-            "error": "Candidates data for DELETE request not found"
-        }
-    }
+    except psycopg2.errors.UndefinedTable as exe:
+        return make_response(jsonify({"msg": "Table {} not exist. \n {}.".format(TABLE_NAME, str(exe))}), 404, CONTENT_HEADER)
+    except Exception as exe:
+        return make_response(jsonify({"msg": "An error occurred: {}. \n {}: {}.".format(error, type(exe), str(exe))}), 404, CONTENT_HEADER)
+        #TODO: LOG THE ERROR
+    finally:
+        connection.close()
+
+
+@app.route("/candidate", methods=["DELETE"])
+def apiHandelDeleteCandidate():
     query = ""
-    success = ""
-    error = ""
+    candidates_raw = None
+    candidates_json = []
+    success = "Successful in deleting all candidates"
+    error = "Candidates data for DELETE request not found"
+    DELETE_ONE_CANDIDATE = f"DELETE FROM {TABLE_NAME} WHERE "
 
     try:
-        # Store the url query params
-        args = request.args.to_dict() 
-        
-        # Check connectivity to DB
-        getReady = apiHandelReady()
-        if(getReady.status_code != 200):
-            return getReady
-        
         connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions)
         cur = connection.cursor()
-        
-        if(request.method == "GET"):  
-            success = messages.get("get", {}).get("success")         
-            error =  messages.get("get", {}).get("error")
 
-            if(args == {}): # Get all candidates               
-                return helper.getResponseFromDB(connection, cur, GET_ALL_CANDIDATES + RECORDS_LIMIT, success, error, request.method)
-            else: # Get one/many candidates
-                query = createQueryByRequestType(args, request.method)
-                return helper.getResponseFromDB(connection, cur, f"{query} {RECORDS_LIMIT}", success, error, request.method)
-                
-        if(request.method == "POST"):
-            action = args.pop("action") # action=update or action=create
-            
-            if(action == "create"):
-                success = messages.get("create", {}).get("success")
-                error = messages.get("create", {}).get("error")  
-            elif(action == "update"):
-                success = messages.get("update", {}).get("success")
-                error = messages.get("update", {}).get("error")
-            else:
-                return make_response(jsonify({"msg": f"'action' key is not correct. The only valid options are 'create' and 'insert'."}), 404, CONTENT_HEADER) 
-            
-            query = createQueryByRequestType(args, request.method, action)
-            return helper.getResponseFromDB(connection, cur, f"{query} RETURNING *", success, error, request.method)
-
-        if(request.method == "DELETE"):
-            success = messages.get("delete", {}).get("success")
-            error = messages.get("delete", {}).get("error")
-            query = createQueryByRequestType(args, request.method)
-            return helper.getResponseFromDB(connection, cur, query, success, error, request.method)
+        # Store the url query params
+        args = request.args.to_dict()
+        # Process each set of values
+        record = helper.argsToSetOfValues(args)                
+        # DELETE FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
+        query = DELETE_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()])
+    
+        cur.execute(query)
+        connection.commit()
+        if(candidates_raw):
+            candidates_json = helper.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+        else:
+            success = f"The request was successfully for this query but no data could be returned: \n {query}"
+        return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
 
     except psycopg2.errors.UndefinedTable as exe:
         return make_response(jsonify({"msg": "Table {} not exist. \n {}.".format(TABLE_NAME, str(exe))}), 404, CONTENT_HEADER)
     except Exception as exe:
-        return make_response(jsonify({"msg": "An error occurred: {}. \n {}.".format(type(exe), str(exe))}), 404, CONTENT_HEADER)
+        return make_response(jsonify({"msg": "An error occurred: {}. \n {}: {}.".format(error, type(exe), str(exe))}), 404, CONTENT_HEADER)
         #TODO: LOG THE ERROR
     finally:
         connection.close()
