@@ -1,0 +1,72 @@
+name: Flask-Posgtres application
+on:
+  push:
+    branches: [ "main", "development" ]
+  pull_request:
+    branches: [ "main", "development" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.10"
+      
+      - name: Build and run Docker Compose
+        env:
+          COMPOSE_OPTIONS: |
+            --env BASE_URL=${{ vars.BASE_URL }}
+            --env DB_HOST=${{ vars.DB_HOST }}
+            --env DB_PORT=${{ vars.DB_PORT }}
+            --env DB_NAME=${{ vars.DB_NAME }}
+            --env DB_USERNAME=${{ vars.DB_USERNAME }}
+            --env DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+            --env DB_TIMEOUT=${{ vars.DB_TIMEOUT }}
+            --env RECORDS_LIMIT=${{ vars.RECORDS_LIMIT }}
+        run: |
+            docker-compose -f compose.yml up -d --build
+            # Retrieve the shortened SHA of the latest commit
+            IMAGE_TAG=$(git rev-parse --short ${{ github.sha }})
+      
+      - name: Run unit tests inside the Docker image
+        run: |
+          # Exit immediately if any command exits with a non-zero status
+          set -e  
+          # Find the ID of the container created by docker-compose
+          CONTAINER_ID=$(docker ps -qf "name=my_flask_app_flask_1")
+          # Execute the unit tests inside the container
+          docker exec $CONTAINER_ID python -m unittest discover tests
+        
+  push-to-ecr:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Install AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+
+      - name: Push Docker image to ECR
+        run: |
+          docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+  
+  cleanup:
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    steps:
+      - name: Cleanup Docker Compose containers
+        run: |
+          docker-compose down
