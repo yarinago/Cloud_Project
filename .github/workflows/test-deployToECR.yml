@@ -33,7 +33,7 @@ jobs:
             --env DB_TIMEOUT=${{ vars.DB_TIMEOUT }}
             --env RECORDS_LIMIT=${{ vars.RECORDS_LIMIT }}
         run: |
-            docker-compose -f compose.yml up -d --build
+            docker-compose -f compose.yml up -d --build $COMPOSE_OPTIONS
             # Retrieve the shortened SHA of the latest commit
             IMAGE_TAG=$(git rev-parse --short ${{ github.sha }})
       
