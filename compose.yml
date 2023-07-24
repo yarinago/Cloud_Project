@@ -8,8 +8,15 @@ services:
       - .:/app
     ports:
       - 5000:5000
-    env_file:
-      - ./.env  # Take the .env file and use it
+    environment:
+      - BASE_URL=${BASE_URL}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_TIMEOUT=${DB_TIMEOUT}
+      - RECORDS_LIMIT=${RECORDS_LIMIT}
     depends_on:
       - postgres
     labels:

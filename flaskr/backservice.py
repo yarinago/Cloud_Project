@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from flask import Flask, request, make_response, render_template, jsonify
 from flaskr import helper
 
-load_dotenv()
+#load_dotenv()
 
 
 # region DB CONNECTION VARIABLES
