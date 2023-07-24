@@ -1,10 +1,8 @@
 import os
 import unittest
-from dotenv import load_dotenv
-from flaskr import backservice
-from flaskr.backservice import app
+from flaskApp import backservice
+from flaskApp.backservice import app
 
-load_dotenv()
 
 #region DB CONNECTION VARIABLES
 BASE_URL = os.getenv("BASE_URL")
@@ -13,9 +11,9 @@ DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 #endregion
 #region CREATE/UPDATE ARGUMENTS VARIABLES
-ARGUMENTS_CREATE = "id=1111111111&first_name=yar&last_name=in&email=yarin@gmail.com&job_id=7894561235&action=create"
+ARGUMENTS_CREATE = "id=1111111111&first_name=yar&last_name=in&email=yarin@gmail.com&job_id=7894561235"
 EXPECTED_DATA_CREATE = {'id': 1111111111, 'first_name': 'yar', 'last_name': 'in', 'email': 'yarin@gmail.com', 'job_id': 7894561235}
-ARGUMENTS_UPDATE = "id=1111111111&first_name=test&last_name=ing&email=testing@gmail.com&job_id=7894561235&action=update"
+ARGUMENTS_UPDATE = "id=1111111111&first_name=test&last_name=ing&email=testing@gmail.com&job_id=7894561235"
 EXPECTED_DATA_UPDATE = {'id': 1111111111, 'first_name': 'test', 'last_name': 'ing', 'email': 'testing@gmail.com', 'job_id': 7894561235}
 #endregion
 
@@ -39,7 +37,7 @@ class TestBackServices(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Healthy", response.json['msg'])
 
-    def test_server_path_incorrect(self):
+    def test_server_incorrect_path(self):
         response = self.app.get(f"{BASE_URL}/invalid")
         self.assertEqual(response.status_code, 404)
         self.assertIn("Route not found", response.json['msg'])
@@ -50,28 +48,43 @@ class TestBackServices(unittest.TestCase):
         self.assertIn("DB connection work", response.json['msg'])
 
     def test_db_pass_incorrect(self): 
-        # Change the value of DB_PASSWORD for testing
-        setattr(backservice, "DB_PASSWORD", "incorrect")
-        response = self.app.get(f"{BASE_URL}/ready")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+        # Set the environment variables directly for this specific test
+        backservice.DB_PASSWORD = "incorrect"
+        try:
+            # Change the value of DB_PASSWORD for testing
+            setattr(backservice, "DB_PASSWORD", "incorrect")
+            response = self.app.get(f"{BASE_URL}/ready")
+            self.assertEqual(response.status_code, 400)
+            self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+        finally:
+            backservice.DB_PASSWORD = DB_PASSWORD
 
     def test_db_username_incorrect(self):
-        setattr(backservice, "DB_USERNAME", "incorrect")
-        response = self.app.get(f"{BASE_URL}/ready")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+        # Set the environment variables directly for this specific test
+        backservice.DB_USERNAME = "incorrect"
+        try:
+            setattr(backservice, "DB_USERNAME", "incorrect")
+            response = self.app.get(f"{BASE_URL}/ready")    
+            self.assertEqual(response.status_code, 400)
+            self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+        finally:
+            backservice.DB_USERNAME = DB_USERNAME
 
     def test_db_not_exist(self):
-        setattr(backservice, "DB_HOST", "incorrect")
-        response = self.app.get(f"{BASE_URL}/ready")
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+        # Set the environment variables directly for this specific test
+        backservice.DB_HOST = "incorrect"
+        try:
+            setattr(backservice, "DB_HOST", "incorrect")
+            response = self.app.get(f"{BASE_URL}/ready")
+            self.assertEqual(response.status_code, 400)
+            self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
+        finally:
+            backservice.DB_HOST = DB_HOST
 
     def test_get_all_valid(self):
         try:
             response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not insert value to DB in order to start the test")
+            self.assertFalse(response.status_code != 200, "Could not insert value to DB in order to start the test")
 
 
             response = self.app.get(f"{BASE_URL}/candidate")
@@ -79,19 +92,19 @@ class TestBackServices(unittest.TestCase):
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
         finally:       
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
 
     def test_get_one_valid(self):
         try:
             response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not insert value to DB in order to start the test")
+            self.assertFalse(response.status_code != 200, "Could not insert value to DB in order to start the test")
 
             response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
             self.assertEqual(response.status_code, 200)
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
 
     def test_post_create_new_valid(self):
         try:
@@ -103,7 +116,7 @@ class TestBackServices(unittest.TestCase):
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
 
     def test_post_create_already_exist(self):
         try:
@@ -118,9 +131,9 @@ class TestBackServices(unittest.TestCase):
             self.assertIn('duplicate key value violates', response.json['msg'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
         
-    def test_post_update_valid(self):
+    def test_put_update_valid(self):
         try:
             response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
             self.assertEqual(response.status_code, 200)        
@@ -128,13 +141,13 @@ class TestBackServices(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
 
-            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
+            response = self.app.put(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
             response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
             self.assertEqual(response.status_code, 200)
             self.assertIn(EXPECTED_DATA_UPDATE, response.json['data'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
         
     def test_delete_valid(self):
         try:
@@ -158,7 +171,7 @@ class TestBackServices(unittest.TestCase):
         self.assertIn("argument is not exist", response.json['msg'])
 
     def test_post_req_params_not_valid(self):
-        response = self.app.post(f"{BASE_URL}/candidate?key=1111111111&action=create")
+        response = self.app.post(f"{BASE_URL}/candidate?key=1111111111")
         self.assertEqual(response.status_code, 404)
         self.assertIn("argument is not exist", response.json['msg'])
 
