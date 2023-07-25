@@ -39,7 +39,7 @@ jobs:
       - name: Build and run Docker Compose
         run: |
           set -x
-          docker-compose -f compose.yml up -d --build --env BASE_URL=${{ vars.BASE_URL }} --env DB_HOST=${{ vars.DB_HOST }} --env DB_PORT=${{ vars.DB_PORT }} --env DB_NAME=${{ vars.DB_NAME }} --env DB_USERNAME=${{ vars.DB_USERNAME }} --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} --env DB_TIMEOUT=${{ vars.DB_TIMEOUT }} --env RECORDS_LIMIT=${{ vars.RECORDS_LIMIT }}
+          docker-compose -f compose.yml up -d --build
           docker container ls
           docker images
           set +x
