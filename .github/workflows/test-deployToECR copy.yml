@@ -30,7 +30,7 @@ jobs:
         run: |
             docker-compose up -d --build
             echo "Done"
-            docker exec flask-postgres-app python -c "print(psycopg2.__version__)"
+            pip install psycopg2
             docker exec flask-postgres-app python -m unittest discover tests
             # The unit tests will run on the container's flask & postgres
             #python3 -m unittest discover tests
