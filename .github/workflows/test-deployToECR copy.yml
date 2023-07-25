@@ -25,8 +25,18 @@ jobs:
         run: |
             ls
             docker-compose -f compose.yml up -d --build
-            docker container ls
-            docker images
             # Retrieve the shortened SHA of the latest commit
             IMAGE_TAG=$(git rev-parse --short ${{ github.sha }})
             echo $IMAGE_TAG
+            
+      - name: Run unit tests inside the Docker image
+        run: |
+          # Exit immediately if any command exits with a non-zero status
+          set -e  
+          # Find the ID of the container created by docker-compose
+          docker images
+          docker container ls
+          CONTAINER_ID=$(docker ps -qf "name=*flask_1")
+          echo $CONTAINER_ID
+          # Execute the unit tests inside the container
+          docker exec $CONTAINER_ID python -m unittest discover tests
