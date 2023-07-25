@@ -1,6 +1,5 @@
 import os
 import psycopg2
-from dotenv import load_dotenv
 from flask import Flask, request, make_response, render_template, jsonify
 from flaskr import helper
 
