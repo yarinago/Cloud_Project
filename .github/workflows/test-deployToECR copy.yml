@@ -29,5 +29,8 @@ jobs:
       - name: Run unit tests on the Docker Compose container
         run: |
             docker-compose up -d --build
+            echo "Done"
+            docker exec flask-postgres-app psycopg2 --version
+            docker exec flask-postgres-app python -m unittest discover tests
             # The unit tests will run on the container's flask & postgres
-            python3 -m unittest discover tests
+            #python3 -m unittest discover tests
