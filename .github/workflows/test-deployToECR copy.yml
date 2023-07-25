@@ -29,10 +29,10 @@ jobs:
             # Exit immediately if any command exits with a non-zero status
             set -e  
             # Find the ID of the container created by docker-compose
-            docker images
             docker container ls
+            docker ps | grep flask
             CONTAINER_ID=$(docker ps -qf "name=*flask_1")
-            echo $CONTAINER_ID
+            echo "CONTAINER_ID={$CONTAINER_ID}"
             # Execute the unit tests inside the container
             docker exec $CONTAINER_ID python -m unittest discover tests
       - name: Install AWS CLI
