@@ -1,6 +1,5 @@
 import os
 import unittest
-from dotenv import load_dotenv
 from flaskr import backservice
 from flaskr.backservice import app
 
