@@ -28,6 +28,6 @@ jobs:
       
       - name: Run unit tests on the Docker Compose container
         run: |
-            docker-compose -f compose.yml up -d --build
+            docker-compose up -d --build
             # The unit tests will run on the container's flask & postgres
             python3 -m unittest discover tests
