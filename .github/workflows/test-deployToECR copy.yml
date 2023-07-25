@@ -27,7 +27,8 @@ jobs:
           
       - name: Priont Docker Compose file
         run: |
-          cat ../compose.yml
+          pwd
+          ls
           cat compose.yml
 
       - name: View Docker Compose Logs
