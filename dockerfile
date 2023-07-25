@@ -9,8 +9,6 @@ COPY . /app
 
 # Install PostgreSQL development files + dependencies
 RUN apt-get update \
-    && apt-get install -y libpq-dev gcc \
-    && rm -rf /var/lib/apt/lists/* \
     && pip install --upgrade pip \
     && python -m pip install -r requirement.txt
 
