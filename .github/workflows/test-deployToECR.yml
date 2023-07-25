@@ -22,18 +22,8 @@ jobs:
           python-version: "3.10"
       
       - name: Build and run Docker Compose
-        env:
-          COMPOSE_OPTIONS: |
-            --env BASE_URL=${{ vars.BASE_URL }}
-            --env DB_HOST=${{ vars.DB_HOST }}
-            --env DB_PORT=${{ vars.DB_PORT }}
-            --env DB_NAME=${{ vars.DB_NAME }}
-            --env DB_USERNAME=${{ vars.DB_USERNAME }}
-            --env DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-            --env DB_TIMEOUT=${{ vars.DB_TIMEOUT }}
-            --env RECORDS_LIMIT=${{ vars.RECORDS_LIMIT }}
         run: |
-            docker-compose -f compose.yml up -d --build $COMPOSE_OPTIONS
+            docker-compose -f compose.yml up -d --build --env BASE_URL=${{ vars.BASE_URL }} --env DB_HOST=${{ vars.DB_HOST }} --env DB_PORT=${{ vars.DB_PORT }} --env DB_NAME=${{ vars.DB_NAME }} --env DB_USERNAME=${{ vars.DB_USERNAME }} --env DB_PASSWORD=${{ secrets.DB_PASSWORD }} --env DB_TIMEOUT=${{ vars.DB_TIMEOUT }} --env RECORDS_LIMIT=${{ vars.RECORDS_LIMIT }}
             docker container ls
             docker images
             # Retrieve the shortened SHA of the latest commit
