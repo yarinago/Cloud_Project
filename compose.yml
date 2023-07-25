@@ -5,19 +5,17 @@ services:
     container_name: flask-postgres-app
     build: .
     command: flask run --host 0.0.0.0 --port 5000
-    volumes:
-      - .:/app
     ports:
       - 5000:5000
     environment:
-      - BASE_URL=${BASE_URL}
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USERNAME=${DB_USERNAME}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_TIMEOUT=${DB_TIMEOUT}
-      - RECORDS_LIMIT=${RECORDS_LIMIT}
+      - BASE_URL=${{ vars.BASE_URL }}
+      - DB_HOST=${{ vars.DB_HOST }}
+      - DB_PORT=${{ vars.DB_PORT }}
+      - DB_NAME=${{ vars.DB_NAME }}
+      - DB_USERNAME=${{ vars.DB_USERNAME }}
+      - DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+      - DB_TIMEOUT=${{ vars.DB_TIMEOUT }}
+      - RECORDS_LIMIT=${{ vars.RECORDS_LIMIT }}
     depends_on:
       - postgres
     labels:
@@ -27,11 +25,10 @@ services:
     restart: on-failure:3
     image: postgres:alpine
     environment:
-      - POSTGRES_USER=${DB_USERNAME}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${{ vars.DB_USERNAME }}
+      - POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+      - POSTGRES_DB=${{ vars.DB_NAME }}
     volumes:
-      - ./postgres-data/postgres:/var/lib/postgresql/data
       - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
     ports:
       - "5432:5432"
