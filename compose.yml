@@ -9,14 +9,14 @@ services:
     ports:
       - 5000:5000
     environment:
-      - BASE_URL=${{ env.BASE_URL }}
-      - DB_HOST=${{ env.DB_HOST }}
-      - DB_PORT=${{ env.DB_PORT }}
-      - DB_NAME=${{ env.DB_NAME }}
-      - DB_USERNAME=${{ env.DB_USERNAME }}
+      - BASE_URL=${{ var.BASE_URL }}
+      - DB_HOST=${{ var.DB_HOST }}
+      - DB_PORT=${{ var.DB_PORT }}
+      - DB_NAME=${{ var.DB_NAME }}
+      - DB_USERNAME=${{ var.DB_USERNAME }}
       - DB_PASSWORD=${{ secrets.DB_PASSWORD }}
-      - DB_TIMEOUT=${{ env.DB_TIMEOUT }}
-      - RECORDS_LIMIT=${{ env.RECORDS_LIMIT }}
+      - DB_TIMEOUT=${{ var.DB_TIMEOUT }}
+      - RECORDS_LIMIT=${{ var.RECORDS_LIMIT }}
     depends_on:
       - postgres
     labels:
@@ -26,9 +26,9 @@ services:
     restart: on-failure:3
     image: postgres:alpine
     environment:
-      - POSTGRES_USER=${{ env.DB_USERNAME }}
+      - POSTGRES_USER=${{ var.DB_USERNAME }}
       - POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
-      - POSTGRES_DB=${{ env.DB_NAME }}
+      - POSTGRES_DB=${{ var.DB_NAME }}
     volumes:
       - ./postgres-data/postgres:/var/lib/postgresql/data
       - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
