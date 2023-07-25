@@ -29,8 +29,11 @@ jobs:
             # Exit immediately if any command exits with a non-zero status
             set -e  
             # Find the ID of the container created by docker-compose
+            echo "docker container ls"
             docker container ls
+            echo "docker ps | grep flask"
             docker ps | grep flask
+            echo "CONTAINER_ID"
             CONTAINER_ID=$(docker ps -qf "name=*flask_1")
             echo "CONTAINER_ID={$CONTAINER_ID}"
             # Execute the unit tests inside the container
