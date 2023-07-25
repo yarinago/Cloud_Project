@@ -12,6 +12,11 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    env:
+      BASE_URL: ${{ vars.BASE_URL }}
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_USERNAME: ${{ vars.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v3
@@ -21,32 +26,8 @@ jobs:
         with:
           python-version: "3.10"
       
-      - name: Build and run Docker Compose
+      - name: Run unit tests on the Docker Compose container
         run: |
             docker-compose -f compose.yml up -d --build
-            # Retrieve the shortened SHA of the latest commit
-            IMAGE_TAG=$(git rev-parse --short ${{ github.sha }})
-            # Exit immediately if any command exits with a non-zero status
-            set -e  
-            # Find the ID of the container created by docker-compose
-            echo "docker container ls"
-            docker container ls
-            echo "docker ps | grep flask"
-            docker ps | grep flask
-            echo "CONTAINER_ID"
-            CONTAINER_ID=$(docker ps -qf "name=*flask_1")
-            echo "CONTAINER_ID={$CONTAINER_ID}"
-            # Execute the unit tests inside the container
-            docker exec $CONTAINER_ID python -m unittest discover tests
-      - name: Install AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-
-      - name: Login to AWS ECR
-        id: login-ecr
-        run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-      - name: Push Docker image to ECR
-        run: |
-          docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+            # The unit tests will run on the container's flask & postgres
+            python3 -m unittest discover tests
