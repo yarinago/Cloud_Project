@@ -24,7 +24,7 @@ jobs:
       - name: Build and run Docker Compose
         run: |
             ls
-            docker-compose -f compose.yml up -d --build
+            docker-compose -f compose.yml up -d --build --compatibility
             # Retrieve the shortened SHA of the latest commit
             IMAGE_TAG=$(git rev-parse --short ${{ github.sha }})
             echo $IMAGE_TAG
