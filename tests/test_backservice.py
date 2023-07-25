@@ -39,7 +39,7 @@ class TestBackServices(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Healthy", response.json['msg'])
 
-    def test_server_path_incorrect(self):
+    def test_server_incorrect_path(self):
         response = self.app.get(f"{BASE_URL}/invalid")
         self.assertEqual(response.status_code, 404)
         self.assertIn("Route not found", response.json['msg'])
