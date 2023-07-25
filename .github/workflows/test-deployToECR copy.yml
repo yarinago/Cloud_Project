@@ -3,6 +3,8 @@ name: Flask-Postgres application
 on:
   push:
     branches: [ "*" ]
+  pull_request:
+    branches: [ "main", "development" ]
 
 permissions:
   contents: read
