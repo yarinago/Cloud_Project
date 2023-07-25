@@ -35,7 +35,11 @@ jobs:
             docker-compose up -d --build
             python -m pip install -r requirement.txt
             echo "Finish Docker Compose"
-            sleep 100
+            # Wait until the PostgreSQL service is ready
+            until docker-compose exec -T flask-postgres-app python3 -c "import psycopg2; psycopg2.connect(host='${DB_HOST}', port='${DB_PORT}', dbname='${DB_NAME}', user='${DB_USERNAME}', password='${DB_PASSWORD}')":
+                echo "Waiting for PostgreSQL to become available..."
+                sleep 5
+
+            # Run the unit tests
             docker exec flask-postgres-app python3 -m unittest discover tests
-            # The unit tests will run on the container's flask & postgres
         
