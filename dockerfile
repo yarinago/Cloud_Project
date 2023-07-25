@@ -20,6 +20,3 @@ ENV FLASK_ENV="docker"
 
 # Expose the port the Flask app will be running on
 EXPOSE 5000
-
-# Start the Flask app
-CMD ["flask", "run", "--host", "0.0.0.0", "--port", "5000"]
