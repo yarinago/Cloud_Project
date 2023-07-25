@@ -35,6 +35,7 @@ jobs:
             docker-compose up -d --build
             python -m pip install -r requirement.txt
             echo "Finish Docker Compose"
+            sleep 100
             docker exec flask-postgres-app python3 -m unittest discover tests
             # The unit tests will run on the container's flask & postgres
         
