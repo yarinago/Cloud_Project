@@ -29,7 +29,7 @@ jobs:
       - name: Run unit tests on the Docker Compose container
         run: |
             docker-compose up -d --build
-            pip install psycopg2
+            python -m pip install -r requirement.txt
             echo "Finish Docker Compose"
             # The unit tests will run on the container's flask & postgres
             python3 -m unittest discover tests
