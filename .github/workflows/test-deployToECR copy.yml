@@ -37,7 +37,7 @@ jobs:
             echo "Finish Docker Compose"
             # Wait until the PostgreSQL service is ready
             sleep 10
-            docker conatiner ls
+            docker container ls
             #docker-compose exec flask-postgres-app apt list --installed
             #docker-compose exec flask-postgres-app python3 -c "echo host='${DB_HOST}', port='${DB_PORT}', dbname='${DB_NAME}', user='${DB_USERNAME}', password='${DB_PASSWORD}'":
             # Run the unit tests
