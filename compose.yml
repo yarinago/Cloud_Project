@@ -3,7 +3,7 @@ version: '3.8'
 services:
   flask:
     build: .
-    command:
+    command: flask run --host 0.0.0.0 --port 5000
     volumes:
       - .:/app
     ports:
