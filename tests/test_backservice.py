@@ -1,7 +1,7 @@
 import os
 import unittest
-from flaskr import backservice
-from flaskr.backservice import app
+from flaskApp import backservice
+from flaskApp.backservice import app
 
 
 #region DB CONNECTION VARIABLES
@@ -11,9 +11,9 @@ DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 #endregion
 #region CREATE/UPDATE ARGUMENTS VARIABLES
-ARGUMENTS_CREATE = "id=1111111111&first_name=yar&last_name=in&email=yarin@gmail.com&job_id=7894561235&action=create"
+ARGUMENTS_CREATE = "id=1111111111&first_name=yar&last_name=in&email=yarin@gmail.com&job_id=7894561235"
 EXPECTED_DATA_CREATE = {'id': 1111111111, 'first_name': 'yar', 'last_name': 'in', 'email': 'yarin@gmail.com', 'job_id': 7894561235}
-ARGUMENTS_UPDATE = "id=1111111111&first_name=test&last_name=ing&email=testing@gmail.com&job_id=7894561235&action=update"
+ARGUMENTS_UPDATE = "id=1111111111&first_name=test&last_name=ing&email=testing@gmail.com&job_id=7894561235"
 EXPECTED_DATA_UPDATE = {'id': 1111111111, 'first_name': 'test', 'last_name': 'ing', 'email': 'testing@gmail.com', 'job_id': 7894561235}
 #endregion
 
@@ -37,7 +37,7 @@ class TestBackServices(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Healthy", response.json['msg'])
 
-    def test_server_path_incorrect(self):
+    def test_server_incorrect_path(self):
         response = self.app.get(f"{BASE_URL}/invalid")
         self.assertEqual(response.status_code, 404)
         self.assertIn("Route not found", response.json['msg'])
@@ -118,7 +118,7 @@ class TestBackServices(unittest.TestCase):
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
             self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
         
-    def test_post_update_valid(self):
+    def test_put_update_valid(self):
         try:
             response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
             self.assertEqual(response.status_code, 200)        
@@ -126,7 +126,7 @@ class TestBackServices(unittest.TestCase):
             self.assertEqual(response.status_code, 200)
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
 
-            response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
+            response = self.app.put(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
             response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
             self.assertEqual(response.status_code, 200)
             self.assertIn(EXPECTED_DATA_UPDATE, response.json['data'])
@@ -156,7 +156,7 @@ class TestBackServices(unittest.TestCase):
         self.assertIn("argument is not exist", response.json['msg'])
 
     def test_post_req_params_not_valid(self):
-        response = self.app.post(f"{BASE_URL}/candidate?key=1111111111&action=create")
+        response = self.app.post(f"{BASE_URL}/candidate?key=1111111111")
         self.assertEqual(response.status_code, 404)
         self.assertIn("argument is not exist", response.json['msg'])
 
