@@ -1,10 +1,8 @@
 import os
 import unittest
-from dotenv import load_dotenv
-from flaskr import backservice
-from flaskr.backservice import app
+from flaskApp import backservice
+from flaskApp.backservice import app
 
-load_dotenv()
 
 #region DB CONNECTION VARIABLES
 BASE_URL = os.getenv("BASE_URL")
