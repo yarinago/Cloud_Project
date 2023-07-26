@@ -19,8 +19,8 @@ services:
     depends_on:
       - postgres
     labels:
-      - "com.example.description=Flask API Service"
-      - "com.example.role=app"
+      - "flask.app.description=Flask API Service"
+      - "flask.app.role=app"
   postgres:
     restart: on-failure:3
     image: postgres:alpine
@@ -33,5 +33,5 @@ services:
     ports:
       - "5432:5432"
     labels:
-      - "com.example.description=PostgreSQL Database"
-      - "com.example.role=db"
+      - "postgres.app.description=PostgreSQL Database"
+      - "postgres.app.role=db"
