@@ -39,7 +39,7 @@ jobs:
             docker logs ${DB_HOST}
             docker port ${DB_HOST}
             docker ps -a
-            docker exec flask-app python3 -c "psql -h ${DB_HOST} -U ${DB_USERNAME} -d ${DB_NAME} -W"
+            docker exec -it flask-app psql -h ${DB_HOST} -U ${DB_USERNAME} -d ${DB_NAME} -W
             #docker exec flask-app python3 -c "import psycopg2; psycopg2.connect(host='${DB_HOST}', port='${DB_PORT}', dbname='${DB_NAME}', user='${DB_USERNAME}', password='${DB_PASSWORD}')"
             #python3 -m unittest discover tests
 
