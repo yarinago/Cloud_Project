@@ -1,7 +1,7 @@
 import os
 import psycopg2
 from flask import Flask, request, make_response, render_template, jsonify
-from flaskApp import utills
+from flaskApp import utils
 
 
 
@@ -21,7 +21,7 @@ TABLE_NAME = "candidates"
 # The private key column name of the TABLE_NAME
 KEY_COLUMNS_NAMES = "id"
 # endregion
-DB_NOT_WORKING_MSG = f"Connection failed with HOST={DB_HOST}, PORT={DB_PORT}, NAME={DB_NAME}, USERNAME={DB_USERNAME}, password is stored in {DB_PASSWORD} secret."
+DB_NOT_WORKING_MSG = f"Connection failed with HOST={DB_HOST}, PORT={DB_PORT}, NAME={DB_NAME}, USERNAME={DB_USERNAME}, password is stored in 'DB_PASSWORD' secret."
 CONTENT_HEADER = {"content_type": "application/json; charset=utf-8"}
 
 app = Flask(__name__)
@@ -86,14 +86,14 @@ def apiHandelGetCandidate():
             query = GET_ALL_CANDIDATES               
         # Get one candidates
         else: 
-            record = utills.argsToSetOfValues(args) # Process each set of values            
+            record = utils.argsToSetOfValues(args) # Process each set of values            
             # SELECT * FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
             query = GET_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()]) 
         
         cur.execute(query + RECORDS_LIMIT)
         candidates_raw = cur.fetchall()
         if(candidates_raw):
-            candidates_json = utills.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)    
@@ -110,8 +110,8 @@ def apiHandelGetCandidate():
 @app.route("/candidate", methods=["POST"])
 def apiHandelPostCandidate():
     query = ""
-    success = ""
-    error = ""
+    success = "Successful in creating all new candidates"
+    error = "Candidates data for POST (creating) request not found"
     values = []
     columns = []
     candidates_raw = None
@@ -122,34 +122,22 @@ def apiHandelPostCandidate():
         cur = connection.cursor()
 
         # Store the url query params
-        args = request.args.to_dict()
-        # Retrieve the 'action' argument and check it is valid
-        action = args.pop("action") 
-        if (not action in {"create", "update"}):
-            return make_response(jsonify({"msg": f"'action' key is incorrect. The only valid options are 'create' and 'insert'."}), 404, CONTENT_HEADER) 
-            
+        args = request.args.to_dict()                
         # Process each set of values
-        record = utills.argsToSetOfValues(args)
-        success = f"Successful in {action} all new candidates"
-        error = f"Candidates data for POST ({action}) request not found"
-
-        # UPDATE {TABLE_NAME} SET first_name=%s, email=%s, ... WHERE id=%s
-        if(action == "update"):
-            key_value_pairs = ", ".join(["{}='{}'".format(key, value) for key, value in record.items()])            
-            query = f"UPDATE {TABLE_NAME} SET {key_value_pairs} WHERE {KEY_COLUMNS_NAMES}='{record.get(KEY_COLUMNS_NAMES)}'"
+        record = utils.argsToSetOfValues(args)
         
+
         # INSERT INTO {TABLE_NAME} (id, first_name, last_name, email, job_id) VALUES (%s, %s, %s, %s, %s)
-        if action == "create":
-            for key, value in record.items():
-                columns.append(key)
-                values.append(f"\'{value}\'")
-            query = "INSERT INTO {} ({}) VALUES ({})".format(TABLE_NAME, ", ".join(columns), ", ".join(values))
+        for key, value in record.items():
+            columns.append(key)
+            values.append(f"\'{value}\'")
+        query = "INSERT INTO {} ({}) VALUES ({})".format(TABLE_NAME, ", ".join(columns), ", ".join(values))
         
         cur.execute(query + "RETURNING *")
         candidates_raw = cur.fetchall()
         connection.commit()
         if(candidates_raw):
-            candidates_json = utills.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
@@ -162,6 +150,44 @@ def apiHandelPostCandidate():
     finally:
         connection.close()
 
+
+@app.route("/candidate", methods=["PUT"])
+def apiHandelPutCandidate():
+    query = ""
+    success = "Successful in updating all new candidates"
+    error = "Candidates data for PUT (updating) request not found"
+    candidates_raw = None
+    candidates_json = []
+
+    try:
+        connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions)
+        cur = connection.cursor()
+
+        # Store the url query params
+        args = request.args.to_dict()
+        # Process each set of values
+        record = utils.argsToSetOfValues(args)        
+
+        # UPDATE {TABLE_NAME} SET first_name=%s, email=%s, ... WHERE id=%s
+        key_value_pairs = ", ".join(["{}='{}'".format(key, value) for key, value in record.items()])            
+        query = f"UPDATE {TABLE_NAME} SET {key_value_pairs} WHERE {KEY_COLUMNS_NAMES}='{record.get(KEY_COLUMNS_NAMES)}'"
+
+        cur.execute(query + "RETURNING *")
+        candidates_raw = cur.fetchall()
+        connection.commit()
+        if(candidates_raw):
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+        else:
+            success = f"The request was successfully for this query but no data could be returned: \n {query}"
+        return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
+    
+    except psycopg2.errors.UndefinedTable as exe:
+        return make_response(jsonify({"msg": "Table {} not exist. \n {}.".format(TABLE_NAME, str(exe))}), 404, CONTENT_HEADER)
+    except Exception as exe:
+        return make_response(jsonify({"msg": "An error occurred: {}. \n {}: {}.".format(error, type(exe), str(exe))}), 404, CONTENT_HEADER)
+        #TODO: LOG THE ERROR
+    finally:
+        connection.close()
 
 @app.route("/candidate", methods=["DELETE"])
 def apiHandelDeleteCandidate():
@@ -179,14 +205,14 @@ def apiHandelDeleteCandidate():
         # Store the url query params
         args = request.args.to_dict()
         # Process each set of values
-        record = utills.argsToSetOfValues(args)                
+        record = utils.argsToSetOfValues(args)                
         # DELETE FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
         query = DELETE_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()])
     
         cur.execute(query)
         connection.commit()
         if(candidates_raw):
-            candidates_json = utills.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
