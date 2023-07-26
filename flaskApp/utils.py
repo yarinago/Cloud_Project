@@ -1,9 +1,5 @@
-import os
 import re as regex
-from dotenv import load_dotenv
 from flask import make_response, jsonify
-
-load_dotenv()
 
 IS_NAME_VALID_REGEX = r'[a-zA-Z]+'
 IS_EMAIL_VALID_REGEX = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,7}\b'

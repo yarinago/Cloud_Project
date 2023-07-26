@@ -126,7 +126,6 @@ def apiHandelPostCandidate():
         # Process each set of values
         record = utils.argsToSetOfValues(args)
         
-
         # INSERT INTO {TABLE_NAME} (id, first_name, last_name, email, job_id) VALUES (%s, %s, %s, %s, %s)
         for key, value in record.items():
             columns.append(key)
