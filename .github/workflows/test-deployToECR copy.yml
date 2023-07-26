@@ -37,24 +37,24 @@ jobs:
             python3 -m unittest discover tests
 
 
-  push-to-ecr:
-    needs: build-and-test
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Install AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-
-      - name: Login to AWS ECR
-        id: login-ecr
-        run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
-      - name: Push Docker image to ECR
-        run: |
-          docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
-          docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+  #push-to-ecr:
+  #  needs: build-and-test
+  #  if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
+  #  runs-on: ubuntu-latest
+#
+  #  steps:
+  #    - name: Install AWS CLI
+  #      uses: aws-actions/configure-aws-credentials@v1
+#
+  #    - name: Login to AWS ECR
+  #      id: login-ecr
+  #      run: |
+  #        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+#
+  #    - name: Push Docker image to ECR
+  #      run: |
+  #        docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+  #        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
   
 
   #cleanup:
