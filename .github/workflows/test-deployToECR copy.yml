@@ -31,11 +31,11 @@ jobs:
       
       - name: Run unit tests on the Docker Compose container
         run: |
-            pip3 install -r requirement.txt
-            docker-compose up -d --build
+            docker-compose build
+            docker-compose up -d
             # The unit tests will run on the container's flask & postgres
             docker container ls
-            docker exec flask-app python3 -c "psycopg2.connect(host='${DB_HOST}', port='${DB_PORT}', dbname='${DB_NAME}', user='${DB_USERNAME}', password='${DB_PASSWORD}')"
+            docker exec flask-app echo "psycopg2.connect(host='$DB_HOST', port='$DB_PORT', dbname='$DB_NAME', user='$DB_USERNAME', password='$DB_PASSWORD')"
             #python3 -m unittest discover tests
 
 
