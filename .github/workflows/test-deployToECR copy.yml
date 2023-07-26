@@ -33,7 +33,7 @@ jobs:
         run: |
             docker-compose up -d --build
             # The unit tests will run on the container's flask & postgres
-            docker container ls
+            pip install requirement.txt
             python3 -m unittest discover tests
 
 
