@@ -18,7 +18,7 @@ RUN apt-get update \
     && python -m pip install -r requirement.txt
 
 # Set python modules path & flask main app path
-ENV FLASK_APP="flaskr.backservice"
+ENV FLASK_APP="flaskApp.backservice"
 ENV FLASK_ENV="docker"
 
 # Expose the port the Flask app will be running on
