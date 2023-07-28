@@ -23,6 +23,7 @@ services:
       - "flask.app.description=Flask API Service"
       - "flask.app.role=app"
   db:
+    container_name: ${DB_HOST}
     restart: on-failure:3
     image: postgres
     environment:
