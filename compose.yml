@@ -2,29 +2,39 @@ version: '3.8'
 
 services:
   flask:
-    container_name: flask-postgres-app
+    container_name: flask-app
     build: .
     command: flask run --host 0.0.0.0 --port 5000
     ports:
       - 5000:5000
     env_file:
       - ./.env  # Take the .env file and use it
+    networks:
+      - db_network
     depends_on:
-      - postgres
+      - db
     labels:
       - "flask.app.description=Flask API Service"
       - "flask.app.role=app"
-  postgres:
+  db:
     restart: on-failure:3
-    image: postgres:alpine
+    image: postgres
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     volumes:
       - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
+    networks:
+      db_network:
+        aliases:
+           - "pdb"
     ports:
-      - "5432:5432"
+      - 5432:5432
     labels:
       - "postgres.app.description=PostgreSQL Database"
       - "postgres.app.role=db"
+
+networks:
+  db_network:
+    driver: bridge
