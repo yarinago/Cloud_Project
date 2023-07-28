@@ -18,26 +18,25 @@ services:
     networks:
       - db_network
     depends_on:
-      - postgres
+      - db
     labels:
       - "flask.app.description=Flask API Service"
       - "flask.app.role=app"
-  postgres:
-    container_name: ${DB_HOST}
+  db:
     restart: on-failure:3
-    image: postgres:alpine
+    image: postgres
     environment:
       - POSTGRES_USER=${DB_USERNAME}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
+    volumes:
+      - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
     networks:
       db_network:
         aliases:
            - "pdb"
-    volumes:
-      - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
     ports:
-      - "5432:5432"
+      - 5432:5432
     labels:
       - "postgres.app.description=PostgreSQL Database"
       - "postgres.app.role=db"
