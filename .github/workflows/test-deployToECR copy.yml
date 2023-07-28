@@ -31,7 +31,7 @@ jobs:
       
       - name: Run unit tests on the Docker Compose container
         run: |
-            docker-compose up --build
+            docker-compose up --build -d
             # The unit tests will run on the container's flask & postgres
             docker ps -a
             CONTAINER_ID=$(docker ps -qf "name=my_flask_app_flask_1")
