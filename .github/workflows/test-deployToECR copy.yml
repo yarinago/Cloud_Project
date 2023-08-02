@@ -34,7 +34,7 @@ jobs:
             docker-compose up --build -d
             docker ps
             CONTAINER_ID=$(docker ps -q --filter "name=flask-app-db")
-            until docker-compose exec postgres pg_isready -h db -U user; do
+            until docker-compose exec -T postgres pg_isready -h db -U user; do
               echo "Waiting for PostgreSQL to be ready..."
               docker logs "$CONTAINER_ID" --tail 50
               sleep 5
