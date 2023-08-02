@@ -31,8 +31,6 @@ jobs:
       
       - name: Run unit tests on the Docker Compose container
         run: |
-            echo "BASE_URL=$BASE_URL DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_NAME=$DB_NAME DB_USERNAME=$DB_USERNAME DB_PASSWORD=$DB_PASSWORD DB_TIMEOUT=$DB_TIMEOUT"
-            echo "Docker Compose Up"
             docker-compose up --build -d
             docker ps
             FLASK_CONTAINER_ID=$(docker ps -q --filter "name=flask-app")
