@@ -34,13 +34,8 @@ jobs:
             docker-compose up --build -d
             docker ps
             CONTAINER_ID=$(docker ps -q --filter "name=flask-app-db")
-            until docker exec -T postgres pg_isready -h db -U user -q; do
-              echo "Waiting for PostgreSQL to be ready..."
-              docker logs "$CONTAINER_ID" --tail 50
-              sleep 5
-            done
             # The unit tests will run on the container's flask & postgres
-            #docker-compose exec -T flask python3 -m unittest discover tests
+            docker-compose exec -T flask python3 -m unittest discover tests
 
 
   #push-to-ecr:
