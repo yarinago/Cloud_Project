@@ -11,7 +11,6 @@ DB_NAME = os.getenv("DB_NAME")
 DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 dbConnectionOptions = "-c statement_timeout={}".format(os.getenv("DB_TIMEOUT"))
-connection = object
 # endregion
 # region SQL QUERIES PARAMS
 # The API request will work on this table with this primary key column
@@ -46,6 +45,7 @@ def apiHandelHealth():
 
 @app.route("/ready", methods=["GET"])
 def apiHandelReady():
+    connection = None  # Declare the variable with a default value
     try:
         connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions) 
         if (connection.status):
@@ -66,6 +66,7 @@ def apiHandelReady():
 def apiHandelGetCandidate():
     query = ""
     candidates_raw = None
+    connection = None  # Declare the variable with a default value
     candidates_json = []
     success = "Successful in fetching all candidates"
     error = "Candidates data for GET request not found"
@@ -106,6 +107,7 @@ def apiHandelGetCandidate():
 @app.route("/candidate", methods=["POST"])
 def apiHandelPostCandidate():
     query = ""
+    connection = None  # Declare the variable with a default value
     success = "Successful in creating all new candidates"
     error = "Candidates data for POST (creating) request not found"
     values = []
@@ -149,6 +151,7 @@ def apiHandelPostCandidate():
 @app.route("/candidate", methods=["PUT"])
 def apiHandelPutCandidate():
     query = ""
+    connection = None  # Declare the variable with a default value
     success = "Successful in updating all new candidates"
     error = "Candidates data for PUT (updating) request not found"
     candidates_raw = None
@@ -187,6 +190,7 @@ def apiHandelPutCandidate():
 @app.route("/candidate", methods=["DELETE"])
 def apiHandelDeleteCandidate():
     query = ""
+    connection = None  # Declare the variable with a default value
     candidates_raw = None
     candidates_json = []
     success = "Successful in deleting all candidates"
