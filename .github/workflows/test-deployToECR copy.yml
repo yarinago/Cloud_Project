@@ -35,7 +35,7 @@ jobs:
             docker ps
             #CONTAINER_ID=$(docker ps -q --filter "name=flask-app-db")
             # The unit tests will run on the container's flask & postgres
-            docker exec -T flask python3 -m unittest discover tests
+            docker exec flask python3 -m unittest discover tests
 
 
   #push-to-ecr:
