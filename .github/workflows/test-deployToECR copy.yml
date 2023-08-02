@@ -39,8 +39,8 @@ jobs:
             
             echo "psql"
             docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT * FROM candidates;"
-            docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $FLASK_CONTAINER_ID psql -h localhost -U user -d postgres -c "SELECT * FROM candidates;" | true
-            docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $FLASK_CONTAINER_ID psql -h flask-app-db -U user -d postgres -c "SELECT * FROM candidates;" | true
+            docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $FLASK_CONTAINER_ID psql -h localhost -U user -d postgres -c "SELECT * FROM candidates;"
+            docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $FLASK_CONTAINER_ID psql -h flask-app-db -U user -d postgres -c "SELECT * FROM candidates;"
             
             docker network ls
             echo "Docker flask-app Logs"
