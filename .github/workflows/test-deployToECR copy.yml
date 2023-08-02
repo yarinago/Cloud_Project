@@ -38,7 +38,7 @@ jobs:
             sleep 10
 
             docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT * FROM candidates;"
-            docker exec -i flask-app ping flask-app-db
+            docker-compose exec flask-app ping flask-app-db
             # The unit tests will run on the containers' flask & postgres            
             #docker-compose exec -T flask python3 -m unittest discover tests
 
