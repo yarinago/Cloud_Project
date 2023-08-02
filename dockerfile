@@ -13,6 +13,7 @@ COPY . /app
 #   * rm -rf /var/lib/apt/lists/* - caches the downloaded package files. Removes those cached files to reduce the size of the Docker image
 RUN apt-get update \
     && apt-get install -y libpq-dev gcc \
+    && apt-get install -y postgresql-client \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --upgrade pip \
     && python -m pip install -r requirement.txt
