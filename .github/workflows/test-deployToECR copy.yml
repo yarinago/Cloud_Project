@@ -41,10 +41,10 @@ jobs:
             
             docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT * FROM candidates;"
             docker network ls
-            echo "Print Env"
-            docker-compose exec -T flask-app env
             echo "Docker flask-app Logs"
             docker-compose logs flask-app
+            echo "Print Env"
+            docker-compose exec -T flask-app printenv
             # The unit tests will run on the containers' flask & postgres            
             #docker-compose exec -T flask python3 -m unittest discover tests
 
