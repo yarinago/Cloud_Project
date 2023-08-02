@@ -33,9 +33,11 @@ jobs:
         run: |
             docker-compose up --build -d
             docker ps
-            CONTAINER_ID=$(docker ps -q --filter "name=flask-app")
-            # The unit tests will run on the container's flask & postgres
-            docker exec $CONTAINER_ID python3 -m unittest discover tests
+            FLASK_CONTAINER_ID=$(docker ps -q --filter "name=flask-app")
+            POSTGRES_CONTAINER_ID=$(docker ps -q --filter "name=flask-app-db")
+            # The unit tests will run on the containers' flask & postgres
+            docker exec $FLASK_CONTAINER_ID python3 -m unittest discover tests
+            docker exec $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT 1"
 
 
   #push-to-ecr:
