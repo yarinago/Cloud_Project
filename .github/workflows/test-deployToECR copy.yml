@@ -32,12 +32,11 @@ jobs:
       - name: Run unit tests on the Docker Compose container
         run: |
             docker-compose up --build -d
-            # The unit tests will run on the container's flask & postgres
             docker ps
-            CONTAINER_ID=$(docker ps -qf "name=my_flask_app_flask_1")
-            docker exec -e PGPASSWORD=${DB_PASSWORD} ${DB_HOST} psql -h ${DB_HOST} -U ${DB_USERNAME} -d ${DB_USERNAME}
-            #docker exec $CONTAINER_ID python3 -c "import psycopg2; psycopg2.connect(host='${DB_HOST}', port='${DB_PORT}', dbname='${DB_NAME}', user='${DB_USERNAME}', password='${DB_PASSWORD}')"
-            #python3 -m unittest discover tests
+            CONTAINER_ID=$(docker ps -q --filter "name=flask-app")
+            echo "CONTAINER ID = $CONTAINER_ID"
+            # The unit tests will run on the container's flask & postgres
+            docker-compose exec -T flask python3 -m unittest discover tests
 
 
   #push-to-ecr:
