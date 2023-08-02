@@ -31,14 +31,20 @@ jobs:
       
       - name: Run unit tests on the Docker Compose container
         run: |
+            echo "BASE_URL=$BASE_URL DB_HOST=$DB_HOST DB_PORT=$DB_PORT DB_NAME=$DB_NAME DB_USERNAME=$DB_USERNAME DB_PASSWORD=$DB_PASSWORD DB_TIMEOUT=$DB_TIMEOUT"
+            echo "Docker Compose Up"
             docker-compose up --build -d
             docker ps
             FLASK_CONTAINER_ID=$(docker ps -q --filter "name=flask-app")
             POSTGRES_CONTAINER_ID=$(docker ps -q --filter "name=flask-app-db")
             sleep 10
-
+            
             docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT * FROM candidates;"
             docker network ls
+            echo "Print Env"
+            docker-compose exec -T flask-app env | grep "DB_"
+            echo "Docker flask-app Logs"
+            docker-compose logs flask-app
             # The unit tests will run on the containers' flask & postgres            
             #docker-compose exec -T flask python3 -m unittest discover tests
 
