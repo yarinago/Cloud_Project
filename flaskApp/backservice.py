@@ -14,6 +14,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 dbConnectionOptions = "-c statement_timeout={}".format(os.getenv("DB_TIMEOUT"))
 connection = object
 # endregion
+# region SQL QUERIES PARAMS
 # The API request will work on this table with this primary key column
 TABLE_NAME = "candidates"
 # The private key column name of the TABLE_NAME
