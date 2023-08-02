@@ -4,13 +4,13 @@ from flask import Flask, request, make_response, render_template, jsonify
 from flaskApp import utils
 
 
-
 # region DB CONNECTION VARIABLES
 DB_HOST = os.getenv("DB_HOST") 
 DB_PORT = os.getenv("DB_PORT")
 DB_NAME = os.getenv("DB_NAME")
 DB_USERNAME = os.getenv("DB_USERNAME")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
+dbConnectionOptions = "-c statement_timeout={}".format(os.getenv("DB_TIMEOUT"))
 connection = object
 # endregion
 # region SQL QUERIES PARAMS
