@@ -48,8 +48,9 @@ def apiHandelHealth():
 def apiHandelReady():
     print("line 49!!!")
     try:
-        print("line 50!!!")
+        print(f"************************ host={DB_HOST}, port={DB_PORT}, dbname={DB_NAME}, user={DB_USERNAME}, password={DB_PASSWORD}")
         connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions) 
+        print(f"connection = {connection}")
         if (connection.status):
             return make_response(jsonify({"msg": "DB connection work"}), 200, CONTENT_HEADER)  
         else: 
