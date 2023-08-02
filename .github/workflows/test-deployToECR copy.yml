@@ -38,7 +38,7 @@ jobs:
             sleep 10
             # The unit tests will run on the containers' flask & postgres
             #docker exec $FLASK_CONTAINER_ID python3 -m unittest discover tests
-            docker exec $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT 1"
+            docker exec -e PGPASSWORD=${{ secrets.DB_PASSWORD }} $POSTGRES_CONTAINER_ID psql -h db -U user -d postgres -c "SELECT 1"
 
 
   #push-to-ecr:
