@@ -14,8 +14,6 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 dbConnectionOptions = "-c statement_timeout={}".format(os.getenv("DB_TIMEOUT"))
 connection = object
 # endregion
-# region SQL QUERIES PARAMS
-RECORDS_LIMIT = os.getenv("RECORDS_LIMIT")
 # The API request will work on this table with this primary key column
 TABLE_NAME = "candidates"
 # The private key column name of the TABLE_NAME
@@ -25,7 +23,7 @@ DB_NOT_WORKING_MSG = f"Connection failed with HOST={DB_HOST}, PORT={DB_PORT}, NA
 CONTENT_HEADER = {"content_type": "application/json; charset=utf-8"}
 
 app = Flask(__name__)
-
+print(dbConnectionOptions)
 
 @app.errorhandler(404) 
 def invalid_route(e): 
@@ -90,7 +88,7 @@ def apiHandelGetCandidate():
             # SELECT * FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
             query = GET_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()]) 
         
-        cur.execute(query + RECORDS_LIMIT)
+        cur.execute(query)
         candidates_raw = cur.fetchall()
         if(candidates_raw):
             candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
