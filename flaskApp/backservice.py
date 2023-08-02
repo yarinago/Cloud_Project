@@ -46,7 +46,6 @@ def apiHandelHealth():
 
 @app.route("/ready", methods=["GET"])
 def apiHandelReady():
-    connection = None
     try:
         connection = psycopg2.connect(host=DB_HOST, port=DB_PORT, dbname=DB_NAME, user=DB_USERNAME, password=DB_PASSWORD, options = dbConnectionOptions) 
         if (connection.status):
