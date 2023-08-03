@@ -48,7 +48,7 @@ jobs:
             #docker-compose exec -T flask printenv
             # The unit tests will run on the containers' flask & postgres            
             #docker-compose exec -T flask python3 -m unittest discover tests
-            docker-compose exec -T flask python3 -m unittest discover tests -k TestBackService.test_db_pass_incorrect -k TestBackService.test_db_username_incorrect -k TestBackService.test_db_not_exist
+            docker-compose exec -T flask python3 -m unittest discover tests -k TestBackService
 
 
   #push-to-ecr:
