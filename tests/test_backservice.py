@@ -48,35 +48,38 @@ class TestBackServices(unittest.TestCase):
         self.assertIn("DB connection work", response.json['msg'])
 
     def test_db_pass_incorrect(self): 
+        # Set the environment variables directly for this specific test
+        backservice.DB_PASSWORD = "incorrect"
         try:
             # Change the value of DB_PASSWORD for testing
-            #setattr(self, "original_db_password", "incorrect")
             setattr(backservice, "DB_PASSWORD", "incorrect")
             response = self.app.get(f"{BASE_URL}/ready")
             self.assertEqual(response.status_code, 400)
             self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
         finally:
-            setattr(backservice, "DB_PASSWORD", DB_PASSWORD)
+            backservice.DB_PASSWORD = DB_PASSWORD
 
     def test_db_username_incorrect(self):
+        # Set the environment variables directly for this specific test
+        backservice.DB_USERNAME = "incorrect"
         try:
-            #setattr(self, "original_db_username", "incorrect")
             setattr(backservice, "DB_USERNAME", "incorrect")
             response = self.app.get(f"{BASE_URL}/ready")    
             self.assertEqual(response.status_code, 400)
             self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
         finally:
-            setattr(backservice, "DB_USERNAME", DB_USERNAME)
+            backservice.DB_USERNAME = DB_USERNAME
 
     def test_db_not_exist(self):
+        # Set the environment variables directly for this specific test
+        backservice.DB_HOST = "incorrect"
         try:
-            #setattr(self, "original_db_host", "incorrect")
             setattr(backservice, "DB_HOST", "incorrect")
             response = self.app.get(f"{BASE_URL}/ready")
             self.assertEqual(response.status_code, 400)
             self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
         finally:
-            setattr(backservice, "DB_HOST", DB_HOST)
+            backservice.DB_HOST = DB_HOST
 
     def test_get_all_valid(self):
         try:
