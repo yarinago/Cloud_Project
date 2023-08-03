@@ -49,19 +49,19 @@ class TestBackServices(unittest.TestCase):
 
     def test_db_pass_incorrect(self): 
         # Change the value of DB_PASSWORD for testing
-        setattr(backservice, "DB_PASSWORD", "incorrect")
+        setattr(self, "original_db_password", "incorrect")
         response = self.app.get(f"{BASE_URL}/ready")
         self.assertEqual(response.status_code, 400)
         self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
 
     def test_db_username_incorrect(self):
-        setattr(backservice, "DB_USERNAME", "incorrect")
+        setattr(self, "original_db_username", "incorrect")
         response = self.app.get(f"{BASE_URL}/ready")
         self.assertEqual(response.status_code, 400)
         self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
 
     def test_db_not_exist(self):
-        setattr(backservice, "DB_HOST", "incorrect")
+        setattr(self, "original_db_host", "incorrect")
         response = self.app.get(f"{BASE_URL}/ready")
         self.assertEqual(response.status_code, 400)
         self.assertIn("One or more of the connection params is incorrect.", response.json['msg'])
