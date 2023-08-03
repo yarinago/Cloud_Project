@@ -78,7 +78,7 @@ class TestBackServices(unittest.TestCase):
     def test_get_all_valid(self):
         try:
             response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not insert value to DB in order to start the test")
+            self.assertFalse(response.status_code != 200, "Could not insert value to DB in order to start the test")
 
 
             response = self.app.get(f"{BASE_URL}/candidate")
@@ -86,19 +86,19 @@ class TestBackServices(unittest.TestCase):
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
         finally:       
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
 
     def test_get_one_valid(self):
         try:
             response = self.app.post(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not insert value to DB in order to start the test")
+            self.assertFalse(response.status_code != 200, "Could not insert value to DB in order to start the test")
 
             response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
             self.assertEqual(response.status_code, 200)
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
 
     def test_post_create_new_valid(self):
         try:
@@ -110,7 +110,7 @@ class TestBackServices(unittest.TestCase):
             self.assertIn(EXPECTED_DATA_CREATE, response.json['data'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
 
     def test_post_create_already_exist(self):
         try:
@@ -125,7 +125,7 @@ class TestBackServices(unittest.TestCase):
             self.assertIn('duplicate key value violates', response.json['msg'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
         
     def test_put_update_valid(self):
         try:
@@ -141,7 +141,7 @@ class TestBackServices(unittest.TestCase):
             self.assertIn(EXPECTED_DATA_UPDATE, response.json['data'])
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_UPDATE}")
-            self.failIf(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
+            self.assertFalse(response.status_code != 200, "Could not delete record from DB in order to do clean up of test")
         
     def test_delete_valid(self):
         try:
