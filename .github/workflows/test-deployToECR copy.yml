@@ -53,8 +53,8 @@ jobs:
         with:
           name: flask_and_db_artifacts  # Name of the artifact
           path: |
-            ./artifacts/flask_app_latest.tar
-            ./artifacts/postgres_db_latest.tar
+            flask_app_latest.tar
+            postgres_db_latest.tar
 
   push-to-ecr:
     needs: build-and-test
@@ -75,13 +75,13 @@ jobs:
         with:
           name: flask_and_db_artifacts
           path: |
-            ./artifacts/flask_app_latest.tar
-            ./artifacts/postgres_db_latest.tar
+            ./flask_app_latest.tar
+            ./postgres_db_latest.tar
 
       - name: Load Docker image from tar
         run: |
-          docker load -i ./artifacts/flask_app_latest.tar
-          docker load -i ./artifacts/postgres_db_latest.tar
+          docker load -i ./flask_app_latest.tar
+          docker load -i ./postgres_db_latest.tar
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
