@@ -43,7 +43,6 @@ jobs:
 
       - name: Save Docker image as artifact
         run: |
-          docker images
           # Save the Docker image as a tar archive
           docker save -o flask_app_latest.tar sample-restapi-to-aws_flask:latest
           docker save -o postgres_db_latest.tar postgres:latest
@@ -75,13 +74,13 @@ jobs:
         with:
           name: flask_and_db_artifacts
           path: |
-            ./flask_app_latest.tar
-            ./postgres_db_latest.tar
+            /home/runner/work/Sample-RestAPI-to-AWS/Sample-RestAPI-to-AWS/flask_app_latest.tar
+            /home/runner/work/Sample-RestAPI-to-AWS/Sample-RestAPI-to-AWS/postgres_db_latest.tar
 
       - name: Load Docker image from tar
         run: |
-          docker load -i ./flask_app_latest.tar
-          docker load -i ./postgres_db_latest.tar
+          docker load -i /home/runner/work/Sample-RestAPI-to-AWS/Sample-RestAPI-to-AWS/flask_app_latest.tar
+          docker load -i /home/runner/work/Sample-RestAPI-to-AWS/Sample-RestAPI-to-AWS/postgres_db_latest.tar
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
