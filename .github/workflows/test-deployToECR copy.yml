@@ -79,6 +79,8 @@ jobs:
 
       - name: Load Docker image from tar
         run: |
+          pwd
+          ls
           docker load -i /home/runner/work/Sample-RestAPI-to-AWS/Sample-RestAPI-to-AWS/flask_app_latest.tar
           docker load -i /home/runner/work/Sample-RestAPI-to-AWS/Sample-RestAPI-to-AWS/postgres_db_latest.tar
           
