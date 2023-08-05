@@ -76,8 +76,6 @@ jobs:
 
       - name: Load Docker image from tar
         run: |
-          pwd
-          ls
           docker load -i flask_app_latest.tar
           docker load -i postgres_db_latest.tar
           
@@ -95,8 +93,8 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-          docker tag my_flask_app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG }
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME }:${IMAGE_TAG}
+          docker tag my_flask_app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
   
 
   #cleanup:
