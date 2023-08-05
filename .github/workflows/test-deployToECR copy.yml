@@ -44,6 +44,24 @@ jobs:
             docker ps
             # The unit tests will run on the containers' flask & postgres            
             docker-compose exec -T flask python3 -m unittest discover tests
+
+      - name: Save Docker image as artifact
+        run: |
+          # Save the Docker image as a tar archive
+          docker save -o flask_app.tar flask-app:$IMAGE_TAG
+          docker save -o postgres_db.tar flask-app-db:$IMAGE_TAG
+          docker save -o flask_app_latest.tar flask-app:latest
+          docker save -o postgres_db_latest.tar flask-app-db:latest
+
+      - name: Upload Docker image artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: flask_and_db_artifacts  # Name of the artifact
+          path: |
+            flask_app.tar
+            postgres_db.tar
+            flask_app_latest.tar
+            postgres_db_latest.tar
             
       #- name: Run unit tests on the Docker Compose container
       #  run: |
@@ -57,10 +75,19 @@ jobs:
   #  needs: build-and-test
   #  if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
   #  runs-on: ubuntu-latest
+  #  env:
+  #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #    AWS_REGION: ${{ vars.AWS_REGION }}
+  #    IMAGE_TAG: ${{ vars.IMAGE_TAG }}
 #
   #  steps:
-  #    - name: Install AWS CLI
+  #    - name: Configure AWS credentials
   #      uses: aws-actions/configure-aws-credentials@v1
+  #      with:
+  #        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  #        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  #        aws-region: eu-central-1
 #
   #    - name: Login to AWS ECR
   #      id: login-ecr
