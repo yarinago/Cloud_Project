@@ -30,9 +30,7 @@ jobs:
 
       - name: Build & Run Docker Compose container
         run: |
-            docker images
-            echo $IMAGE_TAG
-            docker-compose build --build-arg IMAGE_TAG=$IMAGE_TAG
+            docker-compose build --build-arg IMAGE_TAG=${IMAGE_TAG}
             docker-compose up -d             
       
       - name: Wait until Docker Compose Services are up
@@ -43,18 +41,15 @@ jobs:
           
       - name: Run Unit Tests
         run: |
-            docker images
-            echo $IMAGE_TAG
             # The unit tests will run on the containers' flask & postgres            
             docker-compose exec -T flask python3 -m unittest discover tests
 
       - name: Save Docker image as artifact
         run: |
           docker images
-          echo $IMAGE_TAG
           # Save the Docker image as a tar archive
-          docker save -o flask_app.tar flask-app:$IMAGE_TAG
-          docker save -o postgres_db.tar flask-app-db:$IMAGE_TAG
+          docker save -o flask_app.tar flask-app:${IMAGE_TAG}
+          docker save -o postgres_db.tar flask-app-db:${IMAGE_TAG}
           docker save -o flask_app_latest.tar flask-app:latest
           docker save -o postgres_db_latest.tar flask-app-db:latest
 
