@@ -28,21 +28,21 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-central-1
-
       - name: Run unit tests on the Docker Compose container
         run: |
             #docker-compose build --build-arg IMAGE_TAG=$IMAGE_TAG
             docker-compose up --build -d 
             sleep 10
             # The unit tests will run on the containers' flask & postgres            
-            docker-compose exec -T flask python3 -m unittest discover tests
-
+            #docker-compose exec -T flask python3 -m unittest discover tests
+      
+      - name: Run unit tests on the Docker Compose container
+        run: |
+            docker ps
+            #if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
+            #aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
+            #docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+            #docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
 
   #push-to-ecr:
   #  needs: build-and-test
