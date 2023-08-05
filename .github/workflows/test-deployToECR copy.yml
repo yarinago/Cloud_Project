@@ -28,15 +28,10 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build Docker Compose container
+      - name: Build & Run Docker Compose container
         run: |
             docker-compose build --build-arg IMAGE_TAG=$IMAGE_TAG
-
-      - name: Run Docker Compose container
-        run: |
-            docker images
-            docker containers ls
-            docker-compose up -d 
+            docker-compose up -d             
       
       - name: Wait until Docker Compose Services are up
         uses: thegabriele97/dockercompose-health-action@main
