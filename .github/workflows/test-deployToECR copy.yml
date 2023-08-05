@@ -48,10 +48,8 @@ jobs:
         run: |
           docker images
           # Save the Docker image as a tar archive
-          docker save -o flask_app.tar flask-app:${IMAGE_TAG}
-          docker save -o postgres_db.tar flask-app-db:${IMAGE_TAG}
-          docker save -o flask_app_latest.tar flask-app:latest
-          docker save -o postgres_db_latest.tar flask-app-db:latest
+          docker save -o flask_app_latest.tar sample-restapi-to-aws_flask:latest
+          docker save -o postgres_db_latest.tar postgres:latest
 
       - name: Upload Docker image artifacts
         uses: actions/upload-artifact@v2
