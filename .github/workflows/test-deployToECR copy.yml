@@ -47,6 +47,8 @@ jobs:
 
       - name: Save Docker image as artifact
         run: |
+          docker ps
+          docker images
           # Save the Docker image as a tar archive
           docker save -o flask_app.tar flask-app:$IMAGE_TAG
           docker save -o postgres_db.tar flask-app-db:$IMAGE_TAG
