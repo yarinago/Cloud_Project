@@ -13,13 +13,13 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     env:
-      #BASE_URL: ${{ vars.BASE_URL }}
-      #DB_HOST: ${{ vars.DB_HOST }}
-      #DB_PORT: ${{ vars.DB_PORT }}
-      #DB_NAME: ${{ vars.DB_NAME }}
-      #DB_USERNAME: ${{ vars.DB_USERNAME }}
-      #DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-      #DB_TIMEOUT: ${{ vars.DB_TIMEOUT }}
+      BASE_URL: ${{ vars.BASE_URL }}
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_PORT: ${{ vars.DB_PORT }}
+      DB_NAME: ${{ vars.DB_NAME }}
+      DB_USERNAME: ${{ vars.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      DB_TIMEOUT: ${{ vars.DB_TIMEOUT }}
       IMAGE_TAG: ${{ vars.IMAGE_TAG }}
 
     steps:
