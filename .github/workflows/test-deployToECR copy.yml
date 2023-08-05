@@ -20,9 +20,6 @@ jobs:
       DB_USERNAME: ${{ vars.DB_USERNAME }}
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_TIMEOUT: ${{ vars.DB_TIMEOUT }}
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      AWS_REGION: ${{ vars.AWS_REGION }}
       IMAGE_TAG: ${{ vars.IMAGE_TAG }}
 
     steps:
@@ -56,46 +53,51 @@ jobs:
         with:
           name: flask_and_db_artifacts  # Name of the artifact
           path: |
-            flask_app.tar
-            postgres_db.tar
             flask_app_latest.tar
             postgres_db_latest.tar
-            
-      #- name: Run unit tests on the Docker Compose container
-      #  run: |
-      #      docker ps
-            #if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
-            #aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-            #docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
-            #docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
 
-  #push-to-ecr:
-  #  needs: build-and-test
-  #  if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
-  #  runs-on: ubuntu-latest
-  #  env:
-  #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #    AWS_REGION: ${{ vars.AWS_REGION }}
-  #    IMAGE_TAG: ${{ vars.IMAGE_TAG }}
-#
-  #  steps:
-  #    - name: Configure AWS credentials
-  #      uses: aws-actions/configure-aws-credentials@v1
-  #      with:
-  #        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  #        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  #        aws-region: eu-central-1
-#
-  #    - name: Login to AWS ECR
-  #      id: login-ecr
-  #      run: |
-  #        aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-#
-  #    - name: Push Docker image to ECR
-  #      run: |
-  #        docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
-  #        docker push ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
+  push-to-ecr:
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
+    runs-on: ubuntu-latest
+    env:
+      AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ECR_REPO_NAME: ${{ vars.ECR_REPO_NAME }}
+      IMAGE_TAG: ${{ vars.IMAGE_TAG }}
+
+    steps:
+      - name: Download Docker image artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: flask_and_db_artifacts
+          path: |
+            flask_app_latest.tar
+            postgres_db_latest.tar
+
+      - name: Load Docker image from tar
+        run: |
+          docker load -i flask_app_latest.tar
+          docker load -i postgres_db_latest.tar
+          
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${AWS_ACCESS_KEY_ID}
+          aws-secret-access-key: ${AWS_SECRET_ACCESS_KEY}
+          aws-region: ${AWS_REGION}
+
+      - name: Login to AWS ECR
+        id: login-ecr
+        run: |
+          aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com
+
+      - name: Push Docker image to ECR
+        run: |
+          docker tag my_flask_app ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG }
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPO_NAME }:${IMAGE_TAG}
   
 
   #cleanup:
