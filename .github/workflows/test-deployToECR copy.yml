@@ -33,7 +33,7 @@ jobs:
         uses: cloudposse/github-action-docker-compose-test-run@main
         with:
           file: compose.yml
-          service: app
+          service: flask
           command: tests/test_backservice.py
 
 
