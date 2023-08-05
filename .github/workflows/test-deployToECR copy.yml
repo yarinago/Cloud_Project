@@ -28,17 +28,31 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Run unit tests on the Docker Compose container
+      - name: Build Docker Compose container
         run: |
-            #docker-compose build --build-arg IMAGE_TAG=$IMAGE_TAG
-            docker-compose up --build -d 
-            sleep 10
-            # The unit tests will run on the containers' flask & postgres            
-            #docker-compose exec -T flask python3 -m unittest discover tests
+            docker-compose build --build-arg IMAGE_TAG=$IMAGE_TAG
+
+      - name: Run Docker Compose container
+        run: |
+            docker images
+            docker containers ls
+            docker-compose up -d 
       
-      - name: Run unit tests on the Docker Compose container
+      - name: Wait until Docker Compose Services are up
+        uses: thegabriele97/dockercompose-health-action@main
+        with:
+          timeout: '30'
+          workdir: .
+          
+      - name: Run Unit Tests
         run: |
             docker ps
+            # The unit tests will run on the containers' flask & postgres            
+            docker-compose exec -T flask python3 -m unittest discover tests
+            
+      #- name: Run unit tests on the Docker Compose container
+      #  run: |
+      #      docker ps
             #if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
             #aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
             #docker tag my_flask_app ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com/${{ secrets.ECR_REPO_NAME }}:${{ env.IMAGE_TAG }}
