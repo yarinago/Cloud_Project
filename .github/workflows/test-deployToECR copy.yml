@@ -24,17 +24,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.10"
-
-      - name: Tests
-        uses: cloudposse/github-action-docker-compose-test-run@main
-        with:
-          file: compose.yml
-          service: flask
-          command: tests/test_backservice.py
+      - name: Run unit tests on the Docker Compose container
+        run: |
+            docker-compose up --build -d
+            sleep 10
+            # The unit tests will run on the containers' flask & postgres            
+            docker-compose exec -T flask python3 -m unittest discover tests
 
 
   #push-to-ecr:
