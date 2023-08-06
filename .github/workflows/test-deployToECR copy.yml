@@ -95,7 +95,7 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-          docker tag my_flask_app ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+          docker tag sample-restapi-to-aws_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
   
 
