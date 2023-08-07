@@ -16,13 +16,6 @@ permissions:
   contents: read
 
 jobs:
-  prerequisites:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create Repository Name Variable (without owner)
-        run: |
-          echo ${REPO_NAME}
-  
   build-and-test:
     runs-on: ubuntu-latest
     env:
