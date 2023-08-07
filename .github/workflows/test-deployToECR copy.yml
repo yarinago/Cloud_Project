@@ -83,6 +83,8 @@ jobs:
         run: |
           docker load -i flask_app_latest.tar
           docker load -i postgres_db_latest.tar
+          docker images ls
+          docker container ls
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -98,6 +100,8 @@ jobs:
       
       - name: Push Flask Docker image to ECR
         run: |
+          docker images ls
+          docker container ls
           docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
           docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
@@ -105,8 +109,6 @@ jobs:
 
       - name: Push Postgres Docker image to ECR
         run: |
-          docker images ls
-          docker container ls
           docker tag ${{ env.POSTGRES_IMAGE_NAME}}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
           docker tag ${{ env.POSTGRES_IMAGE_NAME}}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
