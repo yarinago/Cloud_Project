@@ -16,6 +16,12 @@ permissions:
   contents: read
 
 jobs:
+  prerequisites:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Repository Name Variable (without owner)
+        run: echo "REPO_NAME=$(basename $GITHUB_REPOSITORY)" >> $GITHUB_ENV
+  
   build-and-test:
     runs-on: ubuntu-latest
     env:
@@ -49,6 +55,7 @@ jobs:
 
       - name: Save Docker image as artifact
         run: |
+          ls ${REPO_NAME}
           # Save the Docker image as a tar archive
           docker save -o flask_app_latest.tar ${REPO_NAME}_flask:latest
           docker save -o postgres_db_latest.tar postgres:latest
