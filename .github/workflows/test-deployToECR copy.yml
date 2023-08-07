@@ -51,8 +51,8 @@ jobs:
       - name: Save Docker image as artifact
         run: |
           # Save the Docker image as a tar archive
-          docker save -o flask_app_latest.tar ${FLASK_SERVICE_NAME}:latest
-          docker save -o postgres_db_latest.tar ${POSTGRES_IMAGE_NAME}:latest
+          docker save -o flask_app_latest.tar ${{ env.FLASK_IMAGE_NAME}}:latest
+          docker save -o postgres_db_latest.tar ${{ env.POSTGRES_IMAGE_NAME}}:latest
       
       - name: Upload Docker image artifacts
         uses: actions/upload-artifact@v2
@@ -98,17 +98,17 @@ jobs:
       
       - name: Push Flask Docker image to ECR
         run: |
-          docker tag ${FLASK_SERVICE_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${FLASK_SERVICE_NAME}:${IMAGE_TAG}
-          docker tag ${FLASK_SERVICE_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${FLASK_SERVICE_NAME}:latest
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${FLASK_SERVICE_NAME}:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${FLASK_SERVICE_NAME}:latest
+          docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.FLASK_IMAGE_NAME}}:${IMAGE_TAG}
+          docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.FLASK_IMAGE_NAME}}:latest
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.FLASK_IMAGE_NAME}}:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.FLASK_IMAGE_NAME}}:latest
 
       - name: Push Postgres Docker image to ECR
         run: |          
-          docker tag ${POSTGRES_IMAGE_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${POSTGRES_IMAGE_NAME}:${IMAGE_TAG}
-          docker tag ${POSTGRES_IMAGE_NAME} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${POSTGRES_IMAGE_NAME}:latest
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${POSTGRES_IMAGE_NAME}:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${POSTGRES_IMAGE_NAME}:latest
+          docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.POSTGRES_IMAGE_NAME}}:${IMAGE_TAG}
+          docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.POSTGRES_IMAGE_NAME}}:latest
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.POSTGRES_IMAGE_NAME}}:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${{ env.POSTGRES_IMAGE_NAME}}:latest
   
 
   #cleanup:
