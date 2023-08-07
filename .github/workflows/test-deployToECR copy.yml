@@ -62,13 +62,6 @@ jobs:
             flask_app_latest.tar
             postgres_db_latest.tar
 
-      - name: Load Docker image from tar
-        run: |
-          docker load -i flask_app_latest.tar
-          docker load -i postgres_db_latest.tar
-          docker images ls
-          docker container ls
-
             
   push-to-ecr:
     needs: build-and-test
@@ -85,24 +78,12 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: flask_and_db_artifacts
-
-      - name: List downloaded files
-        run: ls -la
-
-      - name: List contents of downloaded tar files
-        run: |
-          tar -tf flask_app_latest.tar
-          tar -tf postgres_db_latest.tar
       
       - name: Load Docker image from tar
         run: |
-          docker images ls
-          docker container ls
           docker load -i flask_app_latest.tar
           docker load -i postgres_db_latest.tar
-          docker images ls
-          docker container ls
-          docker ps
+          docker images
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
