@@ -43,8 +43,6 @@ jobs:
 
       - name: Build & Run Docker Compose container
         run: |
-            cat $GITHUB_ENV
-            echo ${REPO_NAME}
             docker-compose build --build-arg IMAGE_TAG=${IMAGE_TAG}
             docker-compose up -d             
       
@@ -61,6 +59,8 @@ jobs:
 
       - name: Save Docker image as artifact
         run: |
+          cat $GITHUB_ENV
+          echo ${REPO_NAME}
           # Save the Docker image as a tar archive
           docker save -o flask_app_latest.tar ${REPO_NAME}_flask:latest
           docker save -o postgres_db_latest.tar postgres:latest
