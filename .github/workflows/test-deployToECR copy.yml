@@ -1,26 +1,3 @@
-Skip to content
-yarinago
-/
-Sample-RestAPI-to-AWS
-
-Type / to search
-
-Code
-Issues
-Pull requests
-3
-Actions
-Projects
-Wiki
-Security
-Insights
-Settings
-testing
-Update test-deployToECR copy.yml #186
-Jobs
-Run details
-Workflow file for this run
-.github/workflows/test-deployToECR copy.yml at a4f30f0
 name: testing
 
 on:
