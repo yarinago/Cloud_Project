@@ -37,16 +37,16 @@ jobs:
             docker-compose build --build-arg IMAGE_TAG=${IMAGE_TAG}
             docker-compose up -d             
       
-      #- name: Wait until Docker Compose Services are up
-      #  uses: thegabriele97/dockercompose-health-action@main
-      #  with:
-      #    timeout: '30'
-      #    workdir: .
-          
-      #- name: Run Unit Tests
-      #  run: |
-      #      # The unit tests will run on the containers' flask & postgres            
-      #      docker-compose exec -T flask python3 -m unittest discover tests
+      - name: Wait until Docker Compose Services are up
+        uses: thegabriele97/dockercompose-health-action@main
+        with:
+          timeout: '30'
+          workdir: .
+         
+      - name: Run Unit Tests
+        run: |
+            # The unit tests will run on the containers' flask & postgres            
+            docker-compose exec -T flask python3 -m unittest discover tests
 
       - name: Save Docker image as artifact
         run: |
@@ -65,8 +65,7 @@ jobs:
             
   push-to-ecr:
     needs: build-and-test
-    #if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
-    if: true
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
     runs-on: ubuntu-latest
     env:
       AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
