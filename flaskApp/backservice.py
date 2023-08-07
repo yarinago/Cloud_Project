@@ -1,7 +1,7 @@
 import os
 import psycopg2
 from flask import Flask, request, make_response, render_template, jsonify
-from flaskApp import utills
+from flaskApp import utils
 
 
 # region DB CONNECTION VARIABLES
@@ -83,14 +83,14 @@ def apiHandelGetCandidate():
             query = GET_ALL_CANDIDATES               
         # Get one candidates
         else: 
-            record = utills.argsToSetOfValues(args) # Process each set of values            
+            record = utils.argsToSetOfValues(args) # Process each set of values            
             # SELECT * FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
             query = GET_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()]) 
         
         cur.execute(query)
         candidates_raw = cur.fetchall()
         if(candidates_raw):
-            candidates_json = utills.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)    
@@ -122,14 +122,7 @@ def apiHandelPostCandidate():
         # Store the url query params
         args = request.args.to_dict()                
         # Process each set of values
-        record = utills.argsToSetOfValues(args)
-        success = f"Successful in {action} all new candidates"
-        error = f"Candidates data for POST ({action}) request not found"
-
-        # UPDATE {TABLE_NAME} SET first_name=%s, email=%s, ... WHERE id=%s
-        if(action == "update"):
-            key_value_pairs = ", ".join(["{}='{}'".format(key, value) for key, value in record.items()])            
-            query = f"UPDATE {TABLE_NAME} SET {key_value_pairs} WHERE {KEY_COLUMNS_NAMES}='{record.get(KEY_COLUMNS_NAMES)}'"
+        record = utils.argsToSetOfValues(args)
         
         # INSERT INTO {TABLE_NAME} (id, first_name, last_name, email, job_id) VALUES (%s, %s, %s, %s, %s)
         for key, value in record.items():
@@ -141,7 +134,7 @@ def apiHandelPostCandidate():
         candidates_raw = cur.fetchall()
         connection.commit()
         if(candidates_raw):
-            candidates_json = utills.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
@@ -211,14 +204,14 @@ def apiHandelDeleteCandidate():
         # Store the url query params
         args = request.args.to_dict()
         # Process each set of values
-        record = utills.argsToSetOfValues(args)                
+        record = utils.argsToSetOfValues(args)                
         # DELETE FROM {TABLE_NAME} WHERE key1=value1 and key2=value2 and ...
         query = DELETE_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()])
     
         cur.execute(query)
         connection.commit()
         if(candidates_raw):
-            candidates_json = utills.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)

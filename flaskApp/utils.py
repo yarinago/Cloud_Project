@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-
-import os
-=======
->>>>>>> 9663de3 (Remove the unneccery load_dotenv and imports)
 import re as regex
 from flask import make_response, jsonify
 
