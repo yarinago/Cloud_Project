@@ -105,7 +105,8 @@ jobs:
 
       - name: Push Postgres Docker image to ECR
         run: |
-          docker images
+          docker images ls
+          docker container ls
           docker tag ${{ env.POSTGRES_IMAGE_NAME}}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
           docker tag ${{ env.POSTGRES_IMAGE_NAME}}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
