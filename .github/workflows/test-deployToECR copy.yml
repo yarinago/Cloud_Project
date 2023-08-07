@@ -9,6 +9,7 @@ env:
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
   AWS_REGION: ${{ vars.AWS_REGION }}
+  REPO_NAME: ${{ steps.extract_repo_name.outputs.repo_name }}
   
 permissions:
   id-token: write   # This is required for requesting the JWT
@@ -49,7 +50,7 @@ jobs:
       - name: Save Docker image as artifact
         run: |
           # Save the Docker image as a tar archive
-          docker save -o flask_app_latest.tar sample-restapi-to-aws_flask:latest
+          docker save -o flask_app_latest.tar ${REPO_NAME}_flask:latest
           docker save -o postgres_db_latest.tar postgres:latest
 
       - name: Upload Docker image artifacts
@@ -95,8 +96,10 @@ jobs:
 
       - name: Push Docker image to ECR
         run: |
-          docker tag sample-restapi-to-aws_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+          docker tag ${REPO_NAME}_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:${IMAGE_TAG}
+          docker tag ${REPO_NAME}_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:latest
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:latest
   
 
   #cleanup:
