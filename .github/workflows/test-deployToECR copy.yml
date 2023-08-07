@@ -43,6 +43,8 @@ jobs:
 
       - name: Build & Run Docker Compose container
         run: |
+            cat $GITHUB_ENV
+            echo ${REPO_NAME}
             docker-compose build --build-arg IMAGE_TAG=${IMAGE_TAG}
             docker-compose up -d             
       
