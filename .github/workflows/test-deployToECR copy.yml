@@ -59,10 +59,9 @@ jobs:
 
       - name: Save Docker image as artifact
         run: |
-          cat $GITHUB_ENV
-          echo ${REPO_NAME}
+          echo ${{ env.REPO_NAME }}
           # Save the Docker image as a tar archive
-          docker save -o flask_app_latest.tar ${REPO_NAME}_flask:latest
+          docker save -o flask_app_latest.tar ${{ env.REPO_NAME }}_flask:latest
           docker save -o postgres_db_latest.tar postgres:latest
 
       - name: Upload Docker image artifacts
