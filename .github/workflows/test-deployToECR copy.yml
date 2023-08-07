@@ -22,7 +22,7 @@ jobs:
         uses: ASzc/change-string-case-action@v5
         with:
           string: ${{ github.event.repository.name }}
-      - id: set REPO_NAME with lowercase
+      - id: step2
         run: echo "REPO_NAME=${{ steps.string.outputs.lowercase }}" >> $GITHUB_ENV
           
   build-and-test:
