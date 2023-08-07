@@ -105,4 +105,3 @@ jobs:
   #    - name: Cleanup Docker Compose containers
   #      run: |
   #        docker-compose down
-Update test-deployToECR copy.yml · yarinago/Sample-RestAPI-to-AWS@a4f30f0 
