@@ -18,8 +18,15 @@ jobs:
   prerequisites:
     runs-on: ubuntu-latest
     steps:
+      - name: Get repository name
+        id: repo-name
+        uses: MariachiBear/get-repo-name-action@v1.1.0
+        with:
+          with-owner: 'false'
+          string-case: 'lowercase'
+          
       - name: Create Repository Name Variable (without owner)
-        run: REPO_NAME=${{ github.event.repository.name | tolower }}
+        run: REPO_NAME=${{ steps.repo-name.outputs.repository-name }}
             
       - name: Create Repository Name Variable (without owner)
         run: echo $REPO_NAME
