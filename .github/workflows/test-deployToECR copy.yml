@@ -86,10 +86,18 @@ jobs:
         with:
           name: flask_and_db_artifacts
 
+      - name: List downloaded files
+        run: ls -la
+
+      - name: List contents of downloaded tar files
+        run: |
+          tar -tf flask_app_latest.tar
+          tar -tf postgres_db_latest.tar
+      
       - name: Load Docker image from tar
         run: |
-          docker load -i flask_app_latest.tar
-          docker load -i postgres_db_latest.tar
+          docker load -i artifacts/flask_app_latest.tar
+          docker load -i artifacts/postgres_db_latest.tar
           docker images ls
           docker container ls
           
