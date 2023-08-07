@@ -18,27 +18,16 @@ jobs:
   prerequisites:
     runs-on: ubuntu-latest
     steps:
-      - name: Get repository name
-        id: repo-name
-        uses: MariachiBear/get-repo-name-action@v1.1.0
+      - id: string
+        uses: ASzc/change-string-case-action@v5
         with:
-          with-owner: 'false'
-          string-case: 'lowercase'
-          
-      - name: Create Repository Name Variable (without owner)
-        run: REPO_NAME=${{ github.event.repository.name | tolower }}
-        shell: bash
-            
-      - name: Create Repository Name Variable (without owner)
-        run: echo $REPO_NAME
-
-      - name: Create Repository Name Variable (without owner)
-        run: echo $REPO_NAME >> $GITHUB_ENV
-
-      - name: Create Repository Name Variable (without owner)
-        run: echo $GITHUB_ENV
+          string: ${{ github.event.repository.name }}
+      - id: step2
+        run: echo ${{ steps.string.outputs.lowercase }}
+        #echo "REPO_NAME=${{ steps.string.outputs.lowercase }}" >> $GITHUB_ENV
           
   build-and-test:
+    needs: prerequisites
     runs-on: ubuntu-latest
     env:
       BASE_URL: ${{ vars.BASE_URL }}
