@@ -20,10 +20,8 @@ jobs:
     steps:
       - name: Create Repository Name Variable (without owner)
         run: |
-          REPO_NAME=${{ steps.set_repo_name.outputs.repo_name }}
-          echo $REPO_NAME
-          echo $REPO_NAME >> $GITHUB_ENV
-          echo $GITHUB_ENV
+          echo "::set-output name=repo_name::$(basename -s .git $GITHUB_REPOSITORY)"
+          echo "Repository Name: ${{ steps.set_repo_name.outputs.repo_name }}"
   
   build-and-test:
     runs-on: ubuntu-latest
