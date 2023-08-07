@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+  #${FLASK_SERVICE_NAME}
   flask:
     container_name: flask-app
     build: .
@@ -22,6 +23,7 @@ services:
     labels:
       - "flask.app.description=Flask API Service"
       - "flask.app.role=app"
+  #${POSTGRES_SERVICE_NAME}
   db:
     restart: on-failure:3
     container_name: flask-app-db
