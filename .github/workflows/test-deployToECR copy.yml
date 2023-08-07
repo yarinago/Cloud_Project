@@ -26,7 +26,8 @@ jobs:
           string-case: 'lowercase'
           
       - name: Create Repository Name Variable (without owner)
-        run: REPO_NAME=${{ steps.repo-name.outputs.repository-name }}
+        run: REPO_NAME=${{ github.event.repository.name | tolower }}
+        shell: bash
             
       - name: Create Repository Name Variable (without owner)
         run: echo $REPO_NAME
