@@ -1,3 +1,26 @@
+Skip to content
+yarinago
+/
+Sample-RestAPI-to-AWS
+
+Type / to search
+
+Code
+Issues
+Pull requests
+3
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+testing
+Update test-deployToECR copy.yml #186
+Jobs
+Run details
+Workflow file for this run
+.github/workflows/test-deployToECR copy.yml at a4f30f0
 name: testing
 
 on:
@@ -15,21 +38,7 @@ permissions:
   contents: read
 
 jobs:
-  prerequisites:
-    runs-on: ubuntu-latest
-    steps:
-      - id: string
-        uses: ASzc/change-string-case-action@v5
-        with:
-          string: ${{ github.event.repository.name }}
-      - id: step2
-        run: echo "REPO_NAME=${{ steps.string.outputs.lowercase }}" >> $GITHUB_ENV
-
-      - name: check
-        run: echo ${{ env.REPO_NAME }}
-          
   build-and-test:
-    needs: prerequisites
     runs-on: ubuntu-latest
     env:
       BASE_URL: ${{ vars.BASE_URL }}
@@ -40,6 +49,8 @@ jobs:
       DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
       DB_TIMEOUT: ${{ vars.DB_TIMEOUT }}
       IMAGE_TAG: ${{ vars.IMAGE_TAG }}
+      FLASK_SERVICE_NAME: flask
+      POSTGRES_SERVICE_NAME: db
 
     steps:
       - uses: actions/checkout@v3
@@ -62,11 +73,9 @@ jobs:
 
       - name: Save Docker image as artifact
         run: |
-          echo ${{ env.REPO_NAME }}
           # Save the Docker image as a tar archive
-          docker save -o flask_app_latest.tar ${{ env.REPO_NAME }}_flask:latest
+          docker save -o flask_app_latest.tar sample-restapi-to-aws_flask:latest
           docker save -o postgres_db_latest.tar postgres:latest
-
       - name: Upload Docker image artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -74,7 +83,6 @@ jobs:
           path: |
             flask_app_latest.tar
             postgres_db_latest.tar
-
   push-to-ecr:
     needs: build-and-test
     #if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development'
@@ -107,13 +115,10 @@ jobs:
         id: login-ecr
         run: |
           aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
-
       - name: Push Docker image to ECR
         run: |
-          docker tag ${REPO_NAME}_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:${IMAGE_TAG}
-          docker tag ${REPO_NAME}_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:latest
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}/${REPO_NAME}_flask:latest
+          docker tag sample-restapi-to-aws_flask ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
   
 
   #cleanup:
@@ -123,3 +128,4 @@ jobs:
   #    - name: Cleanup Docker Compose containers
   #      run: |
   #        docker-compose down
+Update test-deployToECR copy.yml · yarinago/Sample-RestAPI-to-AWS@a4f30f0 
