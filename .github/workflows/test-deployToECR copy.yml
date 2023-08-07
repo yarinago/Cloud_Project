@@ -104,20 +104,9 @@ jobs:
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
 
       - name: Push Postgres Docker image to ECR
-        run: |          
-          docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
-          docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
+        run: |
+          docker images
+          docker tag ${{ env.POSTGRES_IMAGE_NAME}}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
+          docker tag ${{ env.POSTGRES_IMAGE_NAME}}:latest ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:${IMAGE_TAG}
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${ECR_REPO_NAME}:latest
-  
-
-  cleanup:
-    runs-on: ubuntu-latest
-    needs: push-to-ecr
-    steps:
-      - name: Cleanup Docker Compose containers
-        run: |
-          docker-compose down
-          docker volume prune -f
-          docker rm $(docker ps -aq)
-          docker rmi $(docker images -q)
