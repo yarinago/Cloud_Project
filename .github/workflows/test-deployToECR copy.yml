@@ -62,6 +62,13 @@ jobs:
             flask_app_latest.tar
             postgres_db_latest.tar
 
+      - name: Load Docker image from tar
+        run: |
+          docker load -i flask_app_latest.tar
+          docker load -i postgres_db_latest.tar
+          docker images ls
+          docker container ls
+
             
   push-to-ecr:
     needs: build-and-test
