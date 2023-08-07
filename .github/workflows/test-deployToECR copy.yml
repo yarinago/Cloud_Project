@@ -20,7 +20,7 @@ jobs:
     steps:
       - name: Create Repository Name Variable (without owner)
         run: |
-          echo "Repository: ${{ env.GITHUB_REPOSITORY }}"
+          echo ${{ github.event.repository.name }}
   
   build-and-test:
     runs-on: ubuntu-latest
