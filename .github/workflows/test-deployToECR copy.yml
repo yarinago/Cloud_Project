@@ -23,8 +23,10 @@ jobs:
         with:
           string: ${{ github.event.repository.name }}
       - id: step2
-        run: echo ${{ steps.string.outputs.lowercase }}
-        #echo "REPO_NAME=${{ steps.string.outputs.lowercase }}" >> $GITHUB_ENV
+        run: echo "REPO_NAME=${{ steps.string.outputs.lowercase }}" >> $GITHUB_ENV
+
+      - name: check
+        run: echo $REPO_NAME
           
   build-and-test:
     needs: prerequisites
