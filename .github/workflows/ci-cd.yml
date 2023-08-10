@@ -98,20 +98,14 @@ jobs:
       
       - name: Push Flask Docker image to ECR
         run: |
-          docker images
           docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:${IMAGE_TAG}
-          docker images
           docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:latest
-          docker images
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}_${{ env.FLASK_IMAGE_NAME}}:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}_${{ env.FLASK_IMAGE_NAME}}:latest
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:latest
 
       - name: Push Postgres Docker image to ECR
         run: |
-          docker images
           docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:${IMAGE_TAG}
-          docker images
           docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:latest
-          docker images
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}_${{ env.POSTGRES_IMAGE_NAME}}:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}_${{ env.POSTGRES_IMAGE_NAME}}:latest
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:${IMAGE_TAG}
+          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:latest
