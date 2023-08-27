@@ -159,7 +159,7 @@ class TestBackServices(unittest.TestCase):
         finally:
             response = self.app.delete(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
             self.assertEqual(response.status_code, 200)
-            self.assertIn("no data could be returned", response.json['msg'])
+            self.assertIn("Successful in deleting all candidates", response.json['msg'])
 
         response = self.app.get(f"{BASE_URL}/candidate?{ARGUMENTS_CREATE}")
         self.assertEqual(response.status_code, 200)
