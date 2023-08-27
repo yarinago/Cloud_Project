@@ -13,7 +13,7 @@ env:
   POSTGRES_IMAGE_NAME: postgres
   
 permissions:
-  id-token: write   # This is required for requesting the JWT
+  id-token: write   # By using the 'write' value, we will create an OpenID Connection to the AWS which will use JWT (Json-Web-Token)
   contents: read
 
 jobs:
@@ -52,15 +52,12 @@ jobs:
         run: |
           # Save the Docker image as a tar archive
           docker save -o flask_app_latest.tar ${{ env.FLASK_IMAGE_NAME}}:latest
-          docker save -o postgres_db_latest.tar ${{ env.POSTGRES_IMAGE_NAME}}:latest
       
       - name: Upload Docker image artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: flask_and_db_artifacts  # Name of the artifact
-          path: |
-            flask_app_latest.tar
-            postgres_db_latest.tar
+          name: flask_artifacts  # Name of the artifact
+          path: flask_app_latest.tar
 
             
   push-to-ecr:
@@ -77,12 +74,10 @@ jobs:
       - name: Download Docker image artifact
         uses: actions/download-artifact@v2
         with:
-          name: flask_and_db_artifacts
+          name: flask_artifacts
       
       - name: Load Docker image from tar
-        run: |
-          docker load -i flask_app_latest.tar
-          docker load -i postgres_db_latest.tar
+        run: docker load -i flask_app_latest.tar
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -102,10 +97,3 @@ jobs:
           docker tag ${{ env.FLASK_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:latest
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:${IMAGE_TAG}
           docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${FLASK_ECR_REPO_NAME}:latest
-
-      - name: Push Postgres Docker image to ECR
-        run: |
-          docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:${IMAGE_TAG}
-          docker tag ${{ env.POSTGRES_IMAGE_NAME}} ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:latest
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:${IMAGE_TAG}
-          docker push ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com/${POSTGRES_ECR_REPO_NAME}:latest
