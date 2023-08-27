@@ -190,7 +190,6 @@ def apiHandelPutCandidate():
 @app.route("/candidate", methods=["DELETE"])
 def apiHandelDeleteCandidate():
     query = ""
-    candidates_raw = None
     candidates_json = []
     success = "Successful in deleting all candidates"
     error = "Candidates data for DELETE request not found"
@@ -209,11 +208,12 @@ def apiHandelDeleteCandidate():
         query = DELETE_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()])
     
         cur.execute(query)
+        deleted_row_count = cur.rowcount
         connection.commit()
-        if(candidates_raw):
-            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
+        if(deleted_row_count):
+            success += f" ({deleted_row_count} were deleted)"
         else:
-            success = f"The request was successfully for this query but no data could be returned: \n {query}"
+            success = f"The request was successfully for this query but no record found matching the query values: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
 
     except psycopg2.errors.UndefinedTable as exe:
