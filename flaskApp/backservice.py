@@ -209,6 +209,7 @@ def apiHandelDeleteCandidate():
         query = DELETE_ONE_CANDIDATE + " AND ".join(["{}='{}'".format(key, value) for key, value in record.items()])
     
         cur.execute(query)
+        candidates_raw = cur.rowcount
         connection.commit()
         if(candidates_raw):
             candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
