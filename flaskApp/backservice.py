@@ -210,6 +210,7 @@ def apiHandelDeleteCandidate():
     
         cur.execute(query)
         connection.commit()
+        print("########## TEST THIS ####### is " + cur.rowcount)
         if(cur.rowcount > 0):
             candidates_json = utils.rawToJsonWithColumns(cur.rowcount, [desc[0] for desc in cur.description])
         else:
