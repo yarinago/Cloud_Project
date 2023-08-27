@@ -210,9 +210,8 @@ def apiHandelDeleteCandidate():
     
         cur.execute(query)
         connection.commit()
-        print("########## TEST THIS ####### is " + cur.rowcount)
-        if(cur.rowcount > 0):
-            candidates_json = utils.rawToJsonWithColumns(cur.rowcount, [desc[0] for desc in cur.description])
+        if(candidates_raw):
+            candidates_json = utils.rawToJsonWithColumns(candidates_raw, [desc[0] for desc in cur.description])
         else:
             success = f"The request was successfully for this query but no data could be returned: \n {query}"
         return make_response(jsonify({"msg": success, "data": candidates_json}), 200, CONTENT_HEADER)
