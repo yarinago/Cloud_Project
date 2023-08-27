@@ -33,9 +33,7 @@ services:
     volumes:
       - ./postgres-init/init.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the init.sql script
     networks:
-      db_network:
-        aliases:
-           - "pdb"
+      db_network: 
     ports:
       - 5432:5432
     labels:
