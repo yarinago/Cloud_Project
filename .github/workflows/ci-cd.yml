@@ -35,7 +35,7 @@ jobs:
       - name: Build & Run Docker Compose container
         run: |
             docker-compose build --build-arg IMAGE_TAG=${IMAGE_TAG}
-            docker-compose up -d             
+            docker-compose up            
       
       - name: Wait until Docker Compose Services are up
         uses: thegabriele97/dockercompose-health-action@main
