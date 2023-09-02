@@ -22,6 +22,11 @@ services:
     labels:
       - "flask.app.description=Flask API Service"
       - "flask.app.role=app"
+    healthcheck:
+      test: curl --fail http://localhost:5000/ || exit 1
+      interval: 40s
+      timeout: 30s
+      retries: 3
   db:
     restart: on-failure:3
     container_name: flask-app-db
@@ -39,6 +44,11 @@ services:
     labels:
       - "postgres.app.description=PostgreSQL Database"
       - "postgres.app.role=db"
+    healthcheck:
+      test: ["CMD-SHELL", "sh -c 'pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}'"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
 
 networks:
   db_network:
